@@ -1,6 +1,6 @@
 grammar Grammar;
 
-@header{package pp.finalproject}
+@header{package pp.finalproject;}
 
 program: stat+;
 
@@ -18,7 +18,7 @@ target: type
 arraytype: type LSQ expr RSQ
          | type LSQ RSQ;
 
-procedure: PROCEDURE ID LPAR RPAR LCURLY stat* RCURLY #procedure
+procedure: PROCEDURE ID LPAR RPAR LCURLY stat* RCURLY #noParamProcedure
          | PROCEDURE ID LPAR (target ID (COMMA target ID)*)* RPAR LCURLY stat* RCURLY #paramProcedure
          ;
 
@@ -38,7 +38,6 @@ type: INT | BOOL;
 
 INT: 'integer';
 BOOL: 'boolean';
-// Add arrays here
 
 IF: 'if';
 WHILE: 'while';
