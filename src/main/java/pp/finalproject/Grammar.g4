@@ -23,14 +23,14 @@ procedure: PROCEDURE ID LPAR RPAR LCURLY stat* RCURLY #noParamProcedure
          ;
 
 expr: (NUM | TRUE | FALSE) #constExpr
-    | expr AND expr #andExpr
     | expr (TIMES | DIVIDE | MODULO) expr #timesDivideExpr
     | MINUS expr #minusExpr
     | expr (PLUS | MINUS) expr #plusMinusExpr
-    | expr OR expr  #orExpr
     | expr (LT | GT | LTE| | GTE | EQUAL | NOTEQUAL) expr #cmpExpr
     | LPAR expr RPAR #parExpr
     | LCURLY NUM (COMMA NUM)* RCURLY #arrayExpr
+    | expr OR expr  #orExpr
+    | expr AND expr #andExpr
     | ID #idExpr
     ;
 

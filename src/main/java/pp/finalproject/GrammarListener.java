@@ -231,18 +231,6 @@ public interface GrammarListener extends ParseTreeListener {
 	 */
 	void exitIdExpr(@NotNull GrammarParser.IdExprContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code andExpr}
-	 * labeled alternative in {@link GrammarParser#expr}.
-	 * @param ctx the parse tree
-	 */
-	void enterAndExpr(@NotNull GrammarParser.AndExprContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code andExpr}
-	 * labeled alternative in {@link GrammarParser#expr}.
-	 * @param ctx the parse tree
-	 */
-	void exitAndExpr(@NotNull GrammarParser.AndExprContext ctx);
-	/**
 	 * Enter a parse tree produced by the {@code cmpExpr}
 	 * labeled alternative in {@link GrammarParser#expr}.
 	 * @param ctx the parse tree
@@ -254,6 +242,18 @@ public interface GrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitCmpExpr(@NotNull GrammarParser.CmpExprContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code andExpr}
+	 * labeled alternative in {@link GrammarParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterAndExpr(@NotNull GrammarParser.AndExprContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code andExpr}
+	 * labeled alternative in {@link GrammarParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitAndExpr(@NotNull GrammarParser.AndExprContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link GrammarParser#type}.
 	 * @param ctx the parse tree
