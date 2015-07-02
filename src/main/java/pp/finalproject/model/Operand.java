@@ -17,6 +17,7 @@ public class Operand {
         STR,
         MEMADDR,
         TARGET,
-        OPERATOR
+        OPERATOR,
+        BOOL
     }
 }

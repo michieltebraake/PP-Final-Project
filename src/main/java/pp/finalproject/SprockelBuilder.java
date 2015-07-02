@@ -191,6 +191,12 @@ public class SprockelBuilder extends GrammarBaseListener {
 
     @Override
     public void exitOrExpr(@NotNull GrammarParser.OrExprContext ctx) {
+        Reg reg1 = getEmptyRegister();
+        Reg reg2 = getEmptyRegister();
+        loadOperandOrVariable(ctx.expr(0), reg1);
+        loadOperandOrVariable(ctx.expr(1), reg2);
+        emit(OpCode.COMPUTE, new Operator(Operator.OperatorType.OR), reg1, reg2, reg1);
+        resultRegisters.put(ctx, reg1);
         super.exitOrExpr(ctx);
     }
 
@@ -203,6 +209,10 @@ public class SprockelBuilder extends GrammarBaseListener {
     public void exitConstExpr(@NotNull GrammarParser.ConstExprContext ctx) {
         if (ctx.NUM() != null) {
             operands.put(ctx, new Num(Integer.parseInt(ctx.NUM().getText())));
+        } else if (ctx.TRUE() != null) {
+            operands.put(ctx, new Bool(true));
+        } else if (ctx.FALSE() != null) {
+            operands.put(ctx, new Bool(false));
         }
         super.exitConstExpr(ctx);
     }
@@ -221,20 +231,22 @@ public class SprockelBuilder extends GrammarBaseListener {
         //TODO Also here, get proper regs
         Reg reg1 = getEmptyRegister();
         Reg reg2 = getEmptyRegister();
-        if (variables.get(ctx.expr(0)) != null) {
-            loadFromMemory(variables.get(ctx.expr(0)), reg1);
-        } else if (operands.get(ctx.expr(0)) != null) {
-            saveToReg(operands.get(ctx.expr(0)), reg1);
-        }
-        if (variables.get(ctx.expr(1)) != null) {
-            loadFromMemory(variables.get(ctx.expr(1)), reg2);
-        } else if (operands.get(ctx.expr(1)) != null) {
-            saveToReg(operands.get(ctx.expr(1)), reg2);
-        }
-
-        if (ctx.GT() != null) {
+        loadOperandOrVariable(ctx.expr(0), reg1);
+        loadOperandOrVariable(ctx.expr(1), reg2);
+        if (ctx.LT() != null) {
+            emit(OpCode.COMPUTE, new Operator(Operator.OperatorType.LT), reg1, reg2, reg1);
+        } else if (ctx.GT() != null) {
             emit(OpCode.COMPUTE, new Operator(Operator.OperatorType.GT), reg1, reg2, reg1);
+        } else if (ctx.LTE() != null) {
+            emit(OpCode.COMPUTE, new Operator(Operator.OperatorType.LTE), reg1, reg2, reg1);
+        } else if (ctx.GTE() != null) {
+            emit(OpCode.COMPUTE, new Operator(Operator.OperatorType.GTE), reg1, reg2, reg1);
+        } else if (ctx.EQUAL() != null) {
+            emit(OpCode.COMPUTE, new Operator(Operator.OperatorType.EQUAL), reg1, reg2, reg1);
         }
+        //else if (ctx.NOTEQUAL() != null) {
+        //    emit(OpCode.COMPUTE, new Operator(Operator.OperatorType.NOTEQUAL), reg1, reg2, reg1);
+        //}
 
         //Store register that computed value is saved to
         resultRegisters.put(ctx, reg1);
@@ -269,6 +281,12 @@ public class SprockelBuilder extends GrammarBaseListener {
 
     @Override
     public void exitAndExpr(@NotNull GrammarParser.AndExprContext ctx) {
+        Reg reg1 = getEmptyRegister();
+        Reg reg2 = getEmptyRegister();
+        loadOperandOrVariable(ctx.expr(0), reg1);
+        loadOperandOrVariable(ctx.expr(1), reg2);
+        emit(OpCode.COMPUTE, new Operator(Operator.OperatorType.AND), reg1, reg2, reg1);
+        resultRegisters.put(ctx, reg1);
         super.exitAndExpr(ctx);
     }
 
@@ -354,6 +372,14 @@ public class SprockelBuilder extends GrammarBaseListener {
             }
         }
     }*/
+
+    private void loadOperandOrVariable(GrammarParser.ExprContext expr, Reg reg) {
+        if (variables.get(expr) != null) {
+            loadFromMemory(variables.get(expr), reg);
+        } else if (operands.get(expr) != null) {
+            saveToReg(operands.get(expr), reg);
+        }
+    }
 
     private void saveToReg(Operand operand, Reg reg) {
         emit(OpCode.CONST, operand, reg);

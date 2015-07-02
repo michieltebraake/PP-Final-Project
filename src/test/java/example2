@@ -1,2 +1,3 @@
 integer a = 5;
 integer b = a + 10;
+boolean c = a < b;
