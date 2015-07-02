@@ -1,5 +1,7 @@
 package pp.finalproject.model;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,10 +33,7 @@ public class Program {
     public String toString() {
         System.out.println("Number of operations: " + opList.size());
         StringBuilder strBuilder = new StringBuilder();
-        for (Op op : opList) {
-            strBuilder.append(op.toString());
-            strBuilder.append("\n");
-        }
+        strBuilder.append(StringUtils.join(opList, ",\n"));
         return strBuilder.toString();
     }
 }

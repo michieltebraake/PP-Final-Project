@@ -52,11 +52,14 @@ public class Op {
     public String toString() {
         StringBuilder result = new StringBuilder();
 
-        result.append(WordUtils.capitalizeFully(opCode.toString()));
-        result.append(" ");
+        if (opCode.getAlias() != null) {
+            result.append("     "  + opCode.getAlias());
+        } else {
+            result.append("     " + WordUtils.capitalizeFully(opCode.toString()));
+        }
         for (Operand arg : args) {
-            result.append(arg.toString());
             result.append(" ");
+            result.append(arg.toString());
         }
         return result.toString();
     }

@@ -1,4 +1,5 @@
 integer i = 5;
+integer b = 4;
 if (i > 3) {
 	i = 10;
 }

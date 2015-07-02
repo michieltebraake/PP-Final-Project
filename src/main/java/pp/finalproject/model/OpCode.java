@@ -27,7 +27,7 @@ public enum OpCode {
 
     NOP(),
 
-    ENDPROG(),
+    ENDPROG("EndProg"),
 
     //System instructions
     READ(MEMADDR),
@@ -39,12 +39,22 @@ public enum OpCode {
     TESTANDSET(MEMADDR);
 
     private List<Operand.Type> sig;
+    private String alias;
 
     private OpCode(Operand.Type... sig) {
+        this(null, sig);
+    }
+
+    private OpCode(String alias, Operand.Type... sig) {
         this.sig = new ArrayList<>(Arrays.asList(sig));
+        this.alias = alias;
     }
 
     public List<Operand.Type> getSig() {
         return sig;
+    }
+
+    public String getAlias() {
+        return alias;
     }
 }

@@ -27,6 +27,8 @@ public class SprockelBuilder extends GrammarBaseListener {
 
     private ParseTreeProperty<Reg> resultRegisters = new ParseTreeProperty<>();
 
+    private HashMap<String, MemAddr> memory = new HashMap<>();
+
     //Saves the location of branch & jump instructions needed for if statements. The values for this need to be filled in after the if statement
     private ParseTreeProperty<ImmutableTriple<Op, Op, Integer>> branchLines = new ParseTreeProperty<>();
 
@@ -35,12 +37,11 @@ public class SprockelBuilder extends GrammarBaseListener {
     //HashMap of variable names and registers (cleared after every stat)
     private HashMap<String, String> registers = new HashMap<>();
 
-    //Reset every stat? Exitstat isn't even a method to override :(
-    private int usedRegisters;
-
     private List<String> variablesInMemory = new ArrayList<>();
 
     private Program program = new Program();
+
+    private List<Integer> registersInUse = new ArrayList<>();
 
     public SprockelBuilder() {
 
@@ -81,6 +82,13 @@ public class SprockelBuilder extends GrammarBaseListener {
         System.out.println("Created program:");
         System.out.println(program.toString());
         System.out.println("Done.");
+        Util.saveProgram(program);
+        /*Runtime runtime = Runtime.getRuntime();
+        try {
+            Process process = runtime.exec(String.format("ghc -i../Sprockel/src %s", "test"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }*/
     }
 
     @Override
@@ -95,28 +103,32 @@ public class SprockelBuilder extends GrammarBaseListener {
     }
 
     @Override
-    public void exitDeclStat(@NotNull GrammarParser.DeclStatContext ctx) {
+    public void exitDeclAssignStat(@NotNull GrammarParser.DeclAssignStatContext ctx) {
         Reg reg = null;
         if (operands.get(ctx.expr()) != null) {
             reg = getEmptyRegister();
             saveToReg(operands.get(ctx.expr()), reg);
         } else if (resultRegisters.get(ctx.expr()) != null) {
             reg = resultRegisters.get(ctx.expr());
+        } else if (variables.get(ctx.expr()) != null) {
+            reg = loadFromHeap(variables.get(ctx.expr()));
         }
-        saveToMemory(ctx.ID().getText(), reg);
-        super.exitDeclStat(ctx);
+        saveToHeap(ctx.ID().getText(), reg);
+        super.exitDeclAssignStat(ctx);
     }
 
     @Override
     public void exitAssignStat(@NotNull GrammarParser.AssignStatContext ctx) {
-        //TODO Assigning a = b is not yet possible
+        //TODO Assigning a = b is not yet possible, right side of assign has to be an operand right now
+        //An assign statement always saves a value to a named variable, so save this to the heap
         Reg reg = getEmptyRegister();
         if (operands.get(ctx.expr()) != null) {
             saveToReg(operands.get(ctx.expr()), reg);
+            saveToHeap(ctx.ID().getText(), reg);
         }
-        int memoryLocation = variablesInMemory.indexOf(ctx.ID().getText());
+        //int memoryLocation = variablesInMemory.indexOf(ctx.ID().getText());
         //TODO Override memory location?
-        saveToMemory(ctx.ID().getText(), reg, new MemAddr(memoryLocation));
+        //saveToHeap(ctx.ID().getText(), reg, new MemAddr(memoryLocation));
         super.exitAssignStat(ctx);
     }
 
@@ -152,6 +164,13 @@ public class SprockelBuilder extends GrammarBaseListener {
 
     @Override
     public void exitParExpr(@NotNull GrammarParser.ParExprContext ctx) {
+        if (operands.get(ctx.expr()) != null) {
+            operands.put(ctx, operands.get(ctx.expr()));
+        } else if (variables.get(ctx.expr()) != null) {
+            variables.put(ctx, variables.get(ctx.expr()));
+        } else if (resultRegisters.get(ctx.expr()) != null) {
+            resultRegisters.put(ctx, resultRegisters.get(ctx.expr()));
+        }
         super.exitParExpr(ctx);
     }
 
@@ -185,24 +204,25 @@ public class SprockelBuilder extends GrammarBaseListener {
         Op jump = branchLines.get(ctx.ifbody()).getMiddle();
         int opLines = branchLines.get(ctx.ifbody()).getRight();
 
-        branch.setArgs(resultRegisters.get(ctx.expr()), new Target(Target.TargetType.REL, 1));
+        Reg reg = resultRegisters.get(ctx.expr());
+        branch.setArgs(reg, new Target(Target.TargetType.REL, 1));
         int jumpLines = program.opCount() - opLines;
         jump.setArgs(new Target(Target.TargetType.REL, jumpLines));
+        releaseReg(reg);
         super.exitIfStat(ctx);
     }
 
     @Override
     public void exitTimesDivideExpr(@NotNull GrammarParser.TimesDivideExprContext ctx) {
-        Reg reg1 = getEmptyRegister();
-        Reg reg2 = getEmptyRegister();
-        loadOperandOrVariable(ctx.expr(0), reg1);
-        loadOperandOrVariable(ctx.expr(1), reg2);
+        Reg reg1 = popOrGetOperator(ctx.expr(0));
+        Reg reg2 = popOrGetOperator(ctx.expr(1));
         if (ctx.TIMES() != null) {
             emit(OpCode.COMPUTE, new Operator(Operator.OperatorType.MUL), reg1, reg2, reg1);
         } else if (ctx.DIVIDE() != null) {
             emit(OpCode.COMPUTE, new Operator(Operator.OperatorType.DIV), reg1, reg2, reg1);
         }
         resultRegisters.put(ctx, reg1);
+        releaseReg(reg2);
         super.exitTimesDivideExpr(ctx);
     }
 
@@ -217,6 +237,7 @@ public class SprockelBuilder extends GrammarBaseListener {
             emit(OpCode.COMPUTE, new Operator(Operator.OperatorType.SUB), reg1, reg2, reg1);
         }
         resultRegisters.put(ctx, reg1);
+        releaseReg(reg2);
         super.exitPlusMinusExpr(ctx);
     }
 
@@ -226,6 +247,7 @@ public class SprockelBuilder extends GrammarBaseListener {
         Reg reg2 = popOrGetOperator(ctx.expr(1));
         emit(OpCode.COMPUTE, new Operator(Operator.OperatorType.OR), reg1, reg2, reg1);
         resultRegisters.put(ctx, reg1);
+        releaseReg(reg2);
         super.exitOrExpr(ctx);
     }
 
@@ -270,6 +292,8 @@ public class SprockelBuilder extends GrammarBaseListener {
         } else if (ctx.EQUAL() != null) {
             emit(OpCode.COMPUTE, new Operator(Operator.OperatorType.EQUAL), reg1, reg2, reg1);
         }
+        //Reg1 is still used since it contains the return value. Reg2 can already be released
+        releaseReg(reg2);
         //else if (ctx.NOTEQUAL() != null) {
         //    emit(OpCode.COMPUTE, new Operator(Operator.OperatorType.NOTEQUAL), reg1, reg2, reg1);
         //}
@@ -281,10 +305,11 @@ public class SprockelBuilder extends GrammarBaseListener {
 
     @Override
     public void exitAndExpr(@NotNull GrammarParser.AndExprContext ctx) {
-        Reg reg1 = loadOperandOrVariable(ctx.expr(0), null);
-        Reg reg2 = loadOperandOrVariable(ctx.expr(1), null);
+        Reg reg1 = popOrGetOperator(ctx.expr(0));
+        Reg reg2 = popOrGetOperator(ctx.expr(1));
         emit(OpCode.COMPUTE, new Operator(Operator.OperatorType.AND), reg1, reg2, reg1);
         resultRegisters.put(ctx, reg1);
+        releaseReg(reg2);
         super.exitAndExpr(ctx);
     }
 
@@ -293,98 +318,40 @@ public class SprockelBuilder extends GrammarBaseListener {
         super.exitType(ctx);
     }
 
-    /*@Override
-    public void exitTimesDivideExpr(@NotNull GrammarParser.TimesDivideExprContext ctx) {
-        super.exitTimesDivideExpr(ctx);
-        if (ctx.TIMES() != null) {
-            numbers.put(ctx, numbers.get(ctx.expr(0)) * numbers.get(ctx.expr(1)));
-        } else {
-            numbers.put(ctx, numbers.get(ctx.expr(0)) / numbers.get(ctx.expr(1)));
-        }
-    }
+    //Because the heap is easier to access, we use to this for longer variable declarations
+    //The stack is used to store temporary variables (TODO what the fuck does that even mean? reg is the same thing)
+    //Example stack value: if (i > 3 && i < 6). Results from i > 3 and i < 6 are saved to the stack.
+    //in the same example i is saved to the heap
+    //and the 3 and 6 are only put into a register temporarily
 
-    @Override
-    public void exitPlusMinusExpr(@NotNull GrammarParser.PlusMinusExprContext ctx) {
-        super.exitPlusMinusExpr(ctx);
-        if (ctx.PLUS() != null) {
-            numbers.put(ctx, numbers.get(ctx.expr(0)) + numbers.get(ctx.expr(1)));
-        } else {
-            numbers.put(ctx, numbers.get(ctx.expr(0)) - numbers.get(ctx.expr(1)));
-        }
-    }
-
-    @Override
-    public void exitOrExpr(@NotNull GrammarParser.OrExprContext ctx) {
-        super.exitOrExpr(ctx);
-        booleans.put(ctx, booleans.get(ctx.expr(0)) || booleans.get(ctx.expr(1)));
-    }
-
-    @Override
-    public void exitMinusExpr(@NotNull GrammarParser.MinusExprContext ctx) {
-        super.exitMinusExpr(ctx);
-        numbers.put(ctx, -numbers.get(ctx.expr()));
-    }
-
-    @Override
-    public void enterConstExpr(@NotNull GrammarParser.ConstExprContext ctx) {
-        super.enterConstExpr(ctx);
-        if (ctx.NUM() != null) {
-            System.out.println("Number: " + ctx.NUM());
-            numbers.put(ctx, Integer.parseInt(ctx.NUM().getText()));
-        }
-    }
-
-    @Override
-    public void exitAndExpr(@NotNull GrammarParser.AndExprContext ctx) {
-        super.exitAndExpr(ctx);
-        booleans.put(ctx, booleans.get(ctx.expr(0)) && booleans.get(ctx.expr(1)));
-        System.out.println("");
-    }
-
-    @Override
-    public void exitCmpExpr(@NotNull GrammarParser.CmpExprContext ctx) {
-        super.exitCmpExpr(ctx);
-        //LT | GT | LTE| | GTE | EQUAL | NOTEQUAL
-        if (ctx.LT() != null) {
-            booleans.put(ctx, numbers.get(ctx.expr(0)) < numbers.get(ctx.expr(2)));
-        } else if (ctx.GT() != null) {
-            System.out.println(ctx.expr(0));
-            System.out.println(numbers.get(ctx.expr(0)));
-            System.out.println(numbers.get(ctx.expr(1)));
-            booleans.put(ctx, numbers.get(ctx.expr(0)) > numbers.get(ctx.expr(1)));
-        } else if (ctx.LTE() != null) {
-            booleans.put(ctx, numbers.get(ctx.expr(0)) <= numbers.get(ctx.expr(1)));
-        } else if (ctx.GTE() != null) {
-            booleans.put(ctx, numbers.get(ctx.expr(0)) >= numbers.get(ctx.expr(1)));
-        } else if (ctx.EQUAL() != null) {
-            if (numbers.get(ctx.expr(0)) != null) {
-                booleans.put(ctx, numbers.get(ctx.expr(0)) == numbers.get(ctx.expr(1)));
-            } else {
-                booleans.put(ctx, booleans.get(ctx.expr(0)) == booleans.get(ctx.expr(1)));
-            }
-        } else {
-            if (numbers.get(ctx.expr(0)) != null) {
-                booleans.put(ctx, numbers.get(ctx.expr(0)) != numbers.get(ctx.expr(1)));
-            } else {
-                booleans.put(ctx, booleans.get(ctx.expr(0)) != booleans.get(ctx.expr(1)));
-            }
-        }
-    }*/
-
-    private void push (Reg reg) {
-        emit(OpCode.PUSH, reg);
-    }
-
+    /* Methods to access the stack */
+    //TODO Very misleading name, this is going to be an all-purpose access method for operands, the stack and the heap
     private Reg popOrGetOperator(GrammarParser.ExprContext expr) {
-        if (operands.get(expr) != null) {
-            Reg reg = getEmptyRegister();
+        if (resultRegisters.get(expr) != null) {
+            return resultRegisters.get(expr);
+        }
+        //Create a register to return value in
+        Reg reg = getEmptyRegister();
+        //If it is a named variable, load value from heap
+        if (expr instanceof GrammarParser.IdExprContext) {
+            GrammarParser.IdExprContext ctx = (GrammarParser.IdExprContext) expr;
+            MemAddr addr = memory.get(ctx.ID().getText());
+            emit(OpCode.LOAD, addr, reg);
+            return reg;
+        } else if (operands.get(expr) != null) {
             saveToReg(operands.get(expr), reg);
             return reg;
+            //TODO Should this be here like this? if yes, move all calls to that method to this method.
         } else {
-            Reg reg = getEmptyRegister();
             emit(OpCode.POP, reg);
             return reg;
         }
+    }
+
+    //TODO Why is this method never used?
+    private void pushToStack(Reg reg) {
+        emit(OpCode.PUSH, reg);
+        releaseReg(reg);
     }
 
     private Reg loadOperandOrVariable(GrammarParser.ExprContext expr, Reg reg) {
@@ -402,17 +369,28 @@ public class SprockelBuilder extends GrammarBaseListener {
         emit(OpCode.CONST, operand, reg);
     }
 
-    private void saveToMemory(String name, Reg reg) {
-        emit(OpCode.PUSH, reg);
-        variablesInMemory.add(name);
-        usedRegisters--;
-    }
-
-    private void saveToMemory(String name, Reg reg, MemAddr addr) {
+    /* Methods to access the heap (memaddr starts at 0, count up. stack counts down from 127) */
+    private void saveToHeap(String name, Reg reg) {
         //Overwrite memory location, variable stays in memory so no need to add it again
+        MemAddr addr;
+        if (memory.containsKey(name)) {
+            addr = memory.get(name);
+        } else {
+            addr = new MemAddr(memory.size());
+            memory.put(name, addr);
+        }
         emit(OpCode.STORE, reg, addr);
+        releaseReg(reg);
     }
 
+    private Reg loadFromHeap(String name) {
+        MemAddr addr = memory.get(name);
+        Reg reg = getEmptyRegister();
+        emit(OpCode.LOAD, addr, reg);
+        return reg;
+    }
+
+    /* Other (potentially outdated) methods */
     private void loadFromMemory(String variable, Reg reg) {
         int index = variablesInMemory.indexOf(variable);
         if (index != 0) {
@@ -425,17 +403,27 @@ public class SprockelBuilder extends GrammarBaseListener {
         }
     }
 
+    /**
+     * Creates a not yet in use register.
+     * Only 2 registers should ever be needed, so as long as registers are released properly this should always return a valid register
+     *
+     * @return Empty register
+     */
     private Reg getEmptyRegister() {
-        if (usedRegisters == 5)
-            System.out.println("Warning: ran out of registers!");
-        String register = "Reg" + Character.toString((char) (65 + usedRegisters));
-        usedRegisters++;
-        return new Reg(register);
+        for (int i = 1; i <= 5; i++) {
+            if (!registersInUse.contains(i)) {
+                registersInUse.add(i);
+                String register = "Reg" + Character.toString((char) (64 + i));
+                return new Reg(register, i);
+            }
+        }
+
+        System.out.println("Warning: ran out of registers!");
+        return new Reg("Invalidreg" + registersInUse.size());
     }
 
     private void releaseReg(Reg reg) {
-        String regAddress = reg.getAddress().substring(3, 4);
-        System.out.println(regAddress);
+        registersInUse.remove((Integer) reg.getId());
     }
 
     /**

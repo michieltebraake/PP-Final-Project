@@ -31,6 +31,18 @@ public interface GrammarListener extends ParseTreeListener {
 	 */
 	void exitSharedDeclStat(@NotNull GrammarParser.SharedDeclStatContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code sharedDeclAssignStat}
+	 * labeled alternative in {@link GrammarParser#stat}.
+	 * @param ctx the parse tree
+	 */
+	void enterSharedDeclAssignStat(@NotNull GrammarParser.SharedDeclAssignStatContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code sharedDeclAssignStat}
+	 * labeled alternative in {@link GrammarParser#stat}.
+	 * @param ctx the parse tree
+	 */
+	void exitSharedDeclAssignStat(@NotNull GrammarParser.SharedDeclAssignStatContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code declStat}
 	 * labeled alternative in {@link GrammarParser#stat}.
 	 * @param ctx the parse tree
@@ -42,6 +54,18 @@ public interface GrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitDeclStat(@NotNull GrammarParser.DeclStatContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code declAssignStat}
+	 * labeled alternative in {@link GrammarParser#stat}.
+	 * @param ctx the parse tree
+	 */
+	void enterDeclAssignStat(@NotNull GrammarParser.DeclAssignStatContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code declAssignStat}
+	 * labeled alternative in {@link GrammarParser#stat}.
+	 * @param ctx the parse tree
+	 */
+	void exitDeclAssignStat(@NotNull GrammarParser.DeclAssignStatContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code assignStat}
 	 * labeled alternative in {@link GrammarParser#stat}.
@@ -90,6 +114,18 @@ public interface GrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitProcedureStat(@NotNull GrammarParser.ProcedureStatContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code arrayAssignStat}
+	 * labeled alternative in {@link GrammarParser#stat}.
+	 * @param ctx the parse tree
+	 */
+	void enterArrayAssignStat(@NotNull GrammarParser.ArrayAssignStatContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code arrayAssignStat}
+	 * labeled alternative in {@link GrammarParser#stat}.
+	 * @param ctx the parse tree
+	 */
+	void exitArrayAssignStat(@NotNull GrammarParser.ArrayAssignStatContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link GrammarParser#ifbody}.
 	 * @param ctx the parse tree

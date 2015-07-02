@@ -13,7 +13,7 @@ public class Operator extends Operand {
     }
 
     @Override
-    public boolean equals (Object obj) {
+    public boolean equals(Object obj) {
         if (this == obj)
             return true;
 
@@ -25,11 +25,37 @@ public class Operator extends Operand {
     }
 
     public enum OperatorType {
-        ADD, SUB, MUL, DIV, MOD, EQUAL, NEQ, GT, GTE, LT, LTE, AND, OR, XOR, LSHIFT, RSHIFT
-    }
+        ADD("Add"),
+        SUB("Sub"),
+        MUL("Mul"),
+        DIV("Div"),
+        MOD("Mod"),
+        EQUAL("Equal"),
+        NEQ("NEq"),
+        GT("Gt"),
+        GTE("GtE"),
+        LT("Lt"),
+        LTE("LtE"),
+        AND("And"),
+        OR("Or"),
+        XOR("Xor"),
+        LSHIFT("LShift"),
+        RSHIFT("RShift");
+
+        private String alias;
+
+        OperatorType(String alias) {
+            this.alias = alias;
+        }
+
+        public String getAlias() {
+            return alias;
+        }
+
+        }
 
     @Override
     public String toString() {
-        return operatorType.toString();
+        return operatorType.getAlias();
     }
 }

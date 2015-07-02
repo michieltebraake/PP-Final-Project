@@ -52,7 +52,7 @@ public class MemAddr extends Operand {
     @Override
     public String toString() {
         if (address != -1)
-            return Integer.toString(address);
+            return "(Addr " + Integer.toString(address) + ")";
         else
             return "(Deref " + reg.toString() + ")";
     }

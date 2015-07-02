@@ -41,6 +41,18 @@ public class GrammarBaseListener implements GrammarListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterSharedDeclAssignStat(@NotNull GrammarParser.SharedDeclAssignStatContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitSharedDeclAssignStat(@NotNull GrammarParser.SharedDeclAssignStatContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterDeclStat(@NotNull GrammarParser.DeclStatContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -48,6 +60,18 @@ public class GrammarBaseListener implements GrammarListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitDeclStat(@NotNull GrammarParser.DeclStatContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterDeclAssignStat(@NotNull GrammarParser.DeclAssignStatContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitDeclAssignStat(@NotNull GrammarParser.DeclAssignStatContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -96,6 +120,18 @@ public class GrammarBaseListener implements GrammarListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitProcedureStat(@NotNull GrammarParser.ProcedureStatContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterArrayAssignStat(@NotNull GrammarParser.ArrayAssignStatContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitArrayAssignStat(@NotNull GrammarParser.ArrayAssignStatContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

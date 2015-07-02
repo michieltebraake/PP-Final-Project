@@ -1,6 +1,7 @@
 integer a = 5;
-integer b = a + 10;
-boolean c = a < b;
+boolean c = a < 7;
 integer d = a * 3;
-integer e = b / 3;
-integer f = b - 5;
+integer e = d / 3;
+integer f = d - 5;
+
+boolean g = (d + e) < f;
