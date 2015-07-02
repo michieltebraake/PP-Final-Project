@@ -47,7 +47,7 @@ public class SprockelBuilder extends GrammarBaseListener {
         String filename;
         if (args.length == 0) {
             //System.err.println("Usage: [filename]+");
-            filename = "E:\\michiel\\Documents\\GitHub\\PP-Final-Project\\src\\test\\java\\example";
+            filename = "E:\\michiel\\Documents\\GitHub\\PP-Final-Project\\src\\test\\java\\example2";
         } else {
             filename = args[0];
         }
@@ -79,6 +79,7 @@ public class SprockelBuilder extends GrammarBaseListener {
 
     @Override
     public void exitProgram(@NotNull GrammarParser.ProgramContext ctx) {
+        emit(OpCode.ENDPROG);
         super.exitProgram(ctx);
     }
 
@@ -89,9 +90,12 @@ public class SprockelBuilder extends GrammarBaseListener {
 
     @Override
     public void exitDeclStat(@NotNull GrammarParser.DeclStatContext ctx) {
-        Reg reg = getEmptyRegister();
+        Reg reg = null;
         if (operands.get(ctx.expr()) != null) {
+            reg = getEmptyRegister();
             saveToReg(operands.get(ctx.expr()), reg);
+        } else if (resultRegisters.get(ctx.expr()) != null) {
+            reg = resultRegisters.get(ctx.expr());
         }
         saveToMemory(ctx.ID().getText(), reg);
         super.exitDeclStat(ctx);
@@ -104,10 +108,15 @@ public class SprockelBuilder extends GrammarBaseListener {
         if (operands.get(ctx.expr()) != null) {
             saveToReg(operands.get(ctx.expr()), reg);
         }
-        int memoryLocation = variablesInMemory.indexOf(ctx.ID());
+        int memoryLocation = variablesInMemory.indexOf(ctx.ID().getText());
         //TODO Override memory location?
         saveToMemory(ctx.ID().getText(), reg, new MemAddr(memoryLocation));
         super.exitAssignStat(ctx);
+    }
+
+    @Override
+    public void enterIfStat(@NotNull GrammarParser.IfStatContext ctx) {
+        super.enterIfStat(ctx);
     }
 
     @Override
@@ -163,6 +172,20 @@ public class SprockelBuilder extends GrammarBaseListener {
 
     @Override
     public void exitPlusMinusExpr(@NotNull GrammarParser.PlusMinusExprContext ctx) {
+        Reg reg1 = getEmptyRegister();
+        Reg reg2 = getEmptyRegister();
+        if (variables.get(ctx.expr(0)) != null) {
+            loadFromMemory(variables.get(ctx.expr(0)), reg1);
+        } else if (operands.get(ctx.expr(0)) != null) {
+            saveToReg(operands.get(ctx.expr(0)), reg1);
+        }
+        if (variables.get(ctx.expr(1)) != null) {
+            loadFromMemory(variables.get(ctx.expr(1)), reg2);
+        } else if (operands.get(ctx.expr(1)) != null) {
+            saveToReg(operands.get(ctx.expr(1)), reg2);
+        }
+        emit(OpCode.COMPUTE, new Operator(Operator.OperatorType.ADD), reg1, reg2, reg1);
+        resultRegisters.put(ctx, reg1);
         super.exitPlusMinusExpr(ctx);
     }
 
