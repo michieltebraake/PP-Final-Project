@@ -47,7 +47,7 @@ public class SprockelBuilder extends GrammarBaseListener {
         String filename;
         if (args.length == 0) {
             //System.err.println("Usage: [filename]+");
-            filename = "E:\\michiel\\Documents\\GitHub\\PP-Final-Project\\src\\test\\java\\example2";
+            filename = "E:\\michiel\\Documents\\GitHub\\PP-Final-Project\\src\\test\\java\\example";
         } else {
             filename = args[0];
         }
@@ -167,6 +167,16 @@ public class SprockelBuilder extends GrammarBaseListener {
 
     @Override
     public void exitTimesDivideExpr(@NotNull GrammarParser.TimesDivideExprContext ctx) {
+        Reg reg1 = getEmptyRegister();
+        Reg reg2 = getEmptyRegister();
+        loadOperandOrVariable(ctx.expr(0), reg1);
+        loadOperandOrVariable(ctx.expr(1), reg2);
+        if (ctx.TIMES() != null) {
+            emit(OpCode.COMPUTE, new Operator(Operator.OperatorType.MUL), reg1, reg2, reg1);
+        } else if (ctx.DIVIDE() != null) {
+            emit(OpCode.COMPUTE, new Operator(Operator.OperatorType.DIV), reg1, reg2, reg1);
+        }
+        resultRegisters.put(ctx, reg1);
         super.exitTimesDivideExpr(ctx);
     }
 
@@ -174,17 +184,13 @@ public class SprockelBuilder extends GrammarBaseListener {
     public void exitPlusMinusExpr(@NotNull GrammarParser.PlusMinusExprContext ctx) {
         Reg reg1 = getEmptyRegister();
         Reg reg2 = getEmptyRegister();
-        if (variables.get(ctx.expr(0)) != null) {
-            loadFromMemory(variables.get(ctx.expr(0)), reg1);
-        } else if (operands.get(ctx.expr(0)) != null) {
-            saveToReg(operands.get(ctx.expr(0)), reg1);
+        loadOperandOrVariable(ctx.expr(0), reg1);
+        loadOperandOrVariable(ctx.expr(1), reg2);
+        if (ctx.PLUS() != null) {
+            emit(OpCode.COMPUTE, new Operator(Operator.OperatorType.ADD), reg1, reg2, reg1);
+        } else if (ctx.MINUS() != null) {
+            emit(OpCode.COMPUTE, new Operator(Operator.OperatorType.SUB), reg1, reg2, reg1);
         }
-        if (variables.get(ctx.expr(1)) != null) {
-            loadFromMemory(variables.get(ctx.expr(1)), reg2);
-        } else if (operands.get(ctx.expr(1)) != null) {
-            saveToReg(operands.get(ctx.expr(1)), reg2);
-        }
-        emit(OpCode.COMPUTE, new Operator(Operator.OperatorType.ADD), reg1, reg2, reg1);
         resultRegisters.put(ctx, reg1);
         super.exitPlusMinusExpr(ctx);
     }
@@ -227,7 +233,6 @@ public class SprockelBuilder extends GrammarBaseListener {
     @Override
     public void exitCmpExpr(@NotNull GrammarParser.CmpExprContext ctx) {
         //LT | GT | LTE| | GTE | EQUAL | NOTEQUAL
-
         //TODO Also here, get proper regs
         Reg reg1 = getEmptyRegister();
         Reg reg2 = getEmptyRegister();
@@ -397,8 +402,14 @@ public class SprockelBuilder extends GrammarBaseListener {
 
     private void loadFromMemory(String variable, Reg reg) {
         int index = variablesInMemory.indexOf(variable);
-        //TODO Use index to calculate location of variable in memory
-        emit(OpCode.LOAD, new MemAddr(new Reg("SP")), reg);
+        if (index != 0) {
+            Reg tempReg = getEmptyRegister();
+            emit(OpCode.CONST, new Num(index), tempReg);
+            emit(OpCode.COMPUTE, new Operator(Operator.OperatorType.ADD), new Reg("SP"), tempReg, tempReg);
+            emit(OpCode.LOAD, new MemAddr(tempReg), reg);
+        } else {
+            emit(OpCode.LOAD, new MemAddr(new Reg("SP")), reg);
+        }
     }
 
     private Reg getEmptyRegister() {
@@ -407,6 +418,11 @@ public class SprockelBuilder extends GrammarBaseListener {
         String register = new String("Reg" + Character.toString((char) (65 + usedRegisters)));
         usedRegisters++;
         return new Reg(register);
+    }
+
+    private void releaseReg(Reg reg) {
+        String regAddress = reg.getAddress().substring(3, 4);
+        System.out.println(regAddress);
     }
 
     /**
