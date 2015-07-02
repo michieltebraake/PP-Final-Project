@@ -4,12 +4,15 @@ grammar Grammar;
 
 program: stat+;
 
-stat: SHARED target ID ASSIGN expr SEMI #sharedDeclStat
-    | target ID ASSIGN expr SEMI #declStat
+stat: SHARED target ID SEMI #sharedDeclStat
+    | SHARED target ID ASSIGN expr SEMI #sharedDeclAssignStat
+    | target ID SEMI #declStat
+    | target ID ASSIGN expr SEMI #declAssignStat
     | ID ASSIGN expr SEMI #assignStat
     | IF LPAR expr RPAR LCURLY ifbody RCURLY #ifStat
     | WHILE LPAR expr RPAR LCURLY stat* RCURLY #whileStat
     | procedure #procedureStat
+    | ID LSQ expr RSQ ASSIGN expr SEMI #arrayAssignStat
     ;
 
 ifbody: stat*;
@@ -33,6 +36,7 @@ expr: (NUM | TRUE | FALSE) #constExpr
     | LCURLY NUM (COMMA NUM)* RCURLY #arrayExpr
     | expr OR expr  #orExpr
     | expr AND expr #andExpr
+    | ID LSQ expr RSQ #arrayExpr
     | ID #idExpr
     ;
 
