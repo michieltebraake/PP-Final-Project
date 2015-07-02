@@ -7,10 +7,12 @@ program: stat+;
 stat: SHARED target ID ASSIGN expr SEMI #sharedDeclStat
     | target ID ASSIGN expr SEMI #declStat
     | ID ASSIGN expr SEMI #assignStat
-    | IF LPAR expr RPAR LCURLY stat* RCURLY #ifStat
+    | IF LPAR expr RPAR LCURLY ifbody RCURLY #ifStat
     | WHILE LPAR expr RPAR LCURLY stat* RCURLY #whileStat
     | procedure #procedureStat
     ;
+
+ifbody: stat*;
 
 target: type
       | arraytype;

@@ -91,6 +91,16 @@ public interface GrammarListener extends ParseTreeListener {
 	 */
 	void exitProcedureStat(@NotNull GrammarParser.ProcedureStatContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link GrammarParser#ifbody}.
+	 * @param ctx the parse tree
+	 */
+	void enterIfbody(@NotNull GrammarParser.IfbodyContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link GrammarParser#ifbody}.
+	 * @param ctx the parse tree
+	 */
+	void exitIfbody(@NotNull GrammarParser.IfbodyContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link GrammarParser#target}.
 	 * @param ctx the parse tree
 	 */

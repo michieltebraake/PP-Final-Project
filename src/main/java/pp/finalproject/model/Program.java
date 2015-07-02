@@ -15,6 +15,14 @@ public class Program {
 
     public Program() {}
 
+    public int opCount() {
+        return opList.size();
+    }
+
+    public Op getOp(int i) {
+        return opList.get(i);
+    }
+
     public void addOp(Op op) {
         opList.add(op);
     }

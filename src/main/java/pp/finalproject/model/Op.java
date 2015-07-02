@@ -9,10 +9,14 @@ public class Op {
 
     private final OpCode opCode;
 
-    private final List<Operand> args;
+    private List<Operand> args;
 
     public Op(OpCode opCode, Operand... args) {
         this.opCode = opCode;
+        this.args = Arrays.asList(args);
+    }
+
+    public void setArgs(Operand... args) {
         this.args = Arrays.asList(args);
     }
 
