@@ -2,16 +2,39 @@ package pp.finalproject;
 
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.misc.NotNull;
-import org.antlr.v4.runtime.tree.*;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.ParseTreeProperty;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import pp.finalproject.model.*;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public class SprockelBuilder extends GrammarBaseListener {
-    private ParseTreeProperty<String> lines = new ParseTreeProperty<>();
-    private ParseTreeProperty<Integer> numbers = new ParseTreeProperty<>();
-    private ParseTreeProperty<Boolean> booleans = new ParseTreeProperty<>();
+    //private ParseTreeProperty<String> lines = new ParseTreeProperty<>();
+    //private ParseTreeProperty<Integer> numbers = new ParseTreeProperty<>();
+    //private ParseTreeProperty<Boolean> booleans = new ParseTreeProperty<>();
+
+    private ParseTreeProperty<Operand> operands = new ParseTreeProperty<>();
+
+    //Use variable names to find the register associated with it?
+    private ParseTreeProperty<String> variables = new ParseTreeProperty<>();
+
+    private ParseTreeProperty<Reg> resultRegisters = new ParseTreeProperty<>();
+
+    //HashMap of variable names and registers (cleared after every stat)
+    private HashMap<String, String> registers = new HashMap<>();
+
+    //Reset every stat? Exitstat isn't even a method to override :(
+    private int usedRegisters;
+
+    private List<String> variablesInMemory = new ArrayList<>();
+
+    private Program program = new Program();
 
     public SprockelBuilder() {
 
@@ -49,12 +72,9 @@ public class SprockelBuilder extends GrammarBaseListener {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        System.out.println("Created program:");
+        System.out.println(program.toString());
         System.out.println("Done.");
-    }
-
-    @Override
-    public void enterProgram(@NotNull GrammarParser.ProgramContext ctx) {
-        super.enterProgram(ctx);
     }
 
     @Override
@@ -63,49 +83,37 @@ public class SprockelBuilder extends GrammarBaseListener {
     }
 
     @Override
-    public void enterSharedDeclStat(@NotNull GrammarParser.SharedDeclStatContext ctx) {
-        super.enterSharedDeclStat(ctx);
-    }
-
-    @Override
     public void exitSharedDeclStat(@NotNull GrammarParser.SharedDeclStatContext ctx) {
         super.exitSharedDeclStat(ctx);
     }
 
     @Override
-    public void enterDeclStat(@NotNull GrammarParser.DeclStatContext ctx) {
-        super.enterDeclStat(ctx);
-
-    }
-
-    @Override
     public void exitDeclStat(@NotNull GrammarParser.DeclStatContext ctx) {
+        Reg reg = getEmptyRegister();
+        if (operands.get(ctx.expr()) != null) {
+            saveToReg(operands.get(ctx.expr()), reg);
+        }
+        saveToMemory(ctx.ID().getText(), reg);
         super.exitDeclStat(ctx);
     }
 
     @Override
-    public void enterAssignStat(@NotNull GrammarParser.AssignStatContext ctx) {
-        super.enterAssignStat(ctx);
-    }
-
-    @Override
     public void exitAssignStat(@NotNull GrammarParser.AssignStatContext ctx) {
+        //TODO Assigning a = b is not yet possible
+        Reg reg = getEmptyRegister();
+        if (operands.get(ctx.expr()) != null) {
+            saveToReg(operands.get(ctx.expr()), reg);
+        }
+        int memoryLocation = variablesInMemory.indexOf(ctx.ID());
+        //TODO Override memory location?
+        saveToMemory(ctx.ID().getText(), reg, new MemAddr(memoryLocation));
         super.exitAssignStat(ctx);
     }
 
     @Override
-    public void enterIfStat(@NotNull GrammarParser.IfStatContext ctx) {
-        super.enterIfStat(ctx);
-    }
-
-    @Override
     public void exitIfStat(@NotNull GrammarParser.IfStatContext ctx) {
+        emit(OpCode.BRANCH, resultRegisters.get(ctx.expr()), new Target(Target.TargetType.REL, 1));
         super.exitIfStat(ctx);
-    }
-
-    @Override
-    public void enterWhileStat(@NotNull GrammarParser.WhileStatContext ctx) {
-        super.enterWhileStat(ctx);
     }
 
     @Override
@@ -114,18 +122,8 @@ public class SprockelBuilder extends GrammarBaseListener {
     }
 
     @Override
-    public void enterProcedureStat(@NotNull GrammarParser.ProcedureStatContext ctx) {
-        super.enterProcedureStat(ctx);
-    }
-
-    @Override
     public void exitProcedureStat(@NotNull GrammarParser.ProcedureStatContext ctx) {
         super.exitProcedureStat(ctx);
-    }
-
-    @Override
-    public void enterTarget(@NotNull GrammarParser.TargetContext ctx) {
-        super.enterTarget(ctx);
     }
 
     @Override
@@ -134,18 +132,8 @@ public class SprockelBuilder extends GrammarBaseListener {
     }
 
     @Override
-    public void enterArraytype(@NotNull GrammarParser.ArraytypeContext ctx) {
-        super.enterArraytype(ctx);
-    }
-
-    @Override
     public void exitArraytype(@NotNull GrammarParser.ArraytypeContext ctx) {
         super.exitArraytype(ctx);
-    }
-
-    @Override
-    public void enterNoParamProcedure(@NotNull GrammarParser.NoParamProcedureContext ctx) {
-        super.enterNoParamProcedure(ctx);
     }
 
     @Override
@@ -154,18 +142,8 @@ public class SprockelBuilder extends GrammarBaseListener {
     }
 
     @Override
-    public void enterParamProcedure(@NotNull GrammarParser.ParamProcedureContext ctx) {
-        super.enterParamProcedure(ctx);
-    }
-
-    @Override
     public void exitParamProcedure(@NotNull GrammarParser.ParamProcedureContext ctx) {
         super.exitParamProcedure(ctx);
-    }
-
-    @Override
-    public void enterParExpr(@NotNull GrammarParser.ParExprContext ctx) {
-        super.enterParExpr(ctx);
     }
 
     @Override
@@ -174,21 +152,109 @@ public class SprockelBuilder extends GrammarBaseListener {
     }
 
     @Override
-    public void enterArrayExpr(@NotNull GrammarParser.ArrayExprContext ctx) {
-        super.enterArrayExpr(ctx);
-    }
-
-    @Override
     public void exitArrayExpr(@NotNull GrammarParser.ArrayExprContext ctx) {
         super.exitArrayExpr(ctx);
     }
 
     @Override
-    public void enterTimesDivideExpr(@NotNull GrammarParser.TimesDivideExprContext ctx) {
-        super.enterTimesDivideExpr(ctx);
+    public void exitTimesDivideExpr(@NotNull GrammarParser.TimesDivideExprContext ctx) {
+        super.exitTimesDivideExpr(ctx);
     }
 
     @Override
+    public void exitPlusMinusExpr(@NotNull GrammarParser.PlusMinusExprContext ctx) {
+        super.exitPlusMinusExpr(ctx);
+    }
+
+    @Override
+    public void exitOrExpr(@NotNull GrammarParser.OrExprContext ctx) {
+        super.exitOrExpr(ctx);
+    }
+
+    @Override
+    public void exitMinusExpr(@NotNull GrammarParser.MinusExprContext ctx) {
+        super.exitMinusExpr(ctx);
+    }
+
+    @Override
+    public void exitConstExpr(@NotNull GrammarParser.ConstExprContext ctx) {
+        if (ctx.NUM() != null) {
+            operands.put(ctx, new Num(Integer.parseInt(ctx.NUM().getText())));
+        }
+        super.exitConstExpr(ctx);
+    }
+
+    @Override
+    public void exitIdExpr(@NotNull GrammarParser.IdExprContext ctx) {
+        variables.put(ctx, ctx.getText());
+        //registers.put(ctx.getText(), getEmptyRegister());
+        super.exitIdExpr(ctx);
+    }
+
+    @Override
+    public void exitCmpExpr(@NotNull GrammarParser.CmpExprContext ctx) {
+        //LT | GT | LTE| | GTE | EQUAL | NOTEQUAL
+
+        //TODO Also here, get proper regs
+        Reg reg1 = getEmptyRegister();
+        Reg reg2 = getEmptyRegister();
+        if (variables.get(ctx.expr(0)) != null) {
+            loadFromMemory(variables.get(ctx.expr(0)), reg1);
+        } else if (operands.get(ctx.expr(0)) != null) {
+            saveToReg(operands.get(ctx.expr(0)), reg1);
+        }
+        if (variables.get(ctx.expr(1)) != null) {
+            loadFromMemory(variables.get(ctx.expr(1)), reg2);
+        } else if (operands.get(ctx.expr(1)) != null) {
+            saveToReg(operands.get(ctx.expr(1)), reg2);
+        }
+
+        if (ctx.GT() != null) {
+            emit(OpCode.COMPUTE, new Operator(Operator.OperatorType.GT), reg1, reg2, reg1);
+        }
+
+        //Store register that computed value is saved to
+        resultRegisters.put(ctx, reg1);
+
+        /*
+        if (ctx.LT() != null) {
+            booleans.put(ctx, numbers.get(ctx.expr(0)) < numbers.get(ctx.expr(2)));
+        } else if (ctx.GT() != null) {
+            System.out.println(ctx.expr(0));
+            System.out.println(numbers.get(ctx.expr(0)));
+            System.out.println(numbers.get(ctx.expr(1)));
+            booleans.put(ctx, numbers.get(ctx.expr(0)) > numbers.get(ctx.expr(1)));
+        } else if (ctx.LTE() != null) {
+            booleans.put(ctx, numbers.get(ctx.expr(0)) <= numbers.get(ctx.expr(1)));
+        } else if (ctx.GTE() != null) {
+            booleans.put(ctx, numbers.get(ctx.expr(0)) >= numbers.get(ctx.expr(1)));
+        } else if (ctx.EQUAL() != null) {
+            if (numbers.get(ctx.expr(0)) != null) {
+                booleans.put(ctx, numbers.get(ctx.expr(0)) == numbers.get(ctx.expr(1)));
+            } else {
+                booleans.put(ctx, booleans.get(ctx.expr(0)) == booleans.get(ctx.expr(1)));
+            }
+        } else {
+            if (numbers.get(ctx.expr(0)) != null) {
+                booleans.put(ctx, numbers.get(ctx.expr(0)) != numbers.get(ctx.expr(1)));
+            } else {
+                booleans.put(ctx, booleans.get(ctx.expr(0)) != booleans.get(ctx.expr(1)));
+            }
+        }*/
+        super.exitCmpExpr(ctx);
+    }
+
+    @Override
+    public void exitAndExpr(@NotNull GrammarParser.AndExprContext ctx) {
+        super.exitAndExpr(ctx);
+    }
+
+    @Override
+    public void exitType(@NotNull GrammarParser.TypeContext ctx) {
+        super.exitType(ctx);
+    }
+
+    /*@Override
     public void exitTimesDivideExpr(@NotNull GrammarParser.TimesDivideExprContext ctx) {
         super.exitTimesDivideExpr(ctx);
         if (ctx.TIMES() != null) {
@@ -196,11 +262,6 @@ public class SprockelBuilder extends GrammarBaseListener {
         } else {
             numbers.put(ctx, numbers.get(ctx.expr(0)) / numbers.get(ctx.expr(1)));
         }
-    }
-
-    @Override
-    public void enterPlusMinusExpr(@NotNull GrammarParser.PlusMinusExprContext ctx) {
-        super.enterPlusMinusExpr(ctx);
     }
 
     @Override
@@ -214,19 +275,9 @@ public class SprockelBuilder extends GrammarBaseListener {
     }
 
     @Override
-    public void enterOrExpr(@NotNull GrammarParser.OrExprContext ctx) {
-        super.enterOrExpr(ctx);
-    }
-
-    @Override
     public void exitOrExpr(@NotNull GrammarParser.OrExprContext ctx) {
         super.exitOrExpr(ctx);
         booleans.put(ctx, booleans.get(ctx.expr(0)) || booleans.get(ctx.expr(1)));
-    }
-
-    @Override
-    public void enterMinusExpr(@NotNull GrammarParser.MinusExprContext ctx) {
-        super.enterMinusExpr(ctx);
     }
 
     @Override
@@ -245,36 +296,10 @@ public class SprockelBuilder extends GrammarBaseListener {
     }
 
     @Override
-    public void exitConstExpr(@NotNull GrammarParser.ConstExprContext ctx) {
-        super.exitConstExpr(ctx);
-    }
-
-    @Override
-    public void enterIdExpr(@NotNull GrammarParser.IdExprContext ctx) {
-        super.enterIdExpr(ctx);
-    }
-
-    @Override
-    public void exitIdExpr(@NotNull GrammarParser.IdExprContext ctx) {
-        super.exitIdExpr(ctx);
-    }
-
-    @Override
-    public void enterAndExpr(@NotNull GrammarParser.AndExprContext ctx) {
-        super.enterAndExpr(ctx);
-    }
-
-    @Override
     public void exitAndExpr(@NotNull GrammarParser.AndExprContext ctx) {
         super.exitAndExpr(ctx);
         booleans.put(ctx, booleans.get(ctx.expr(0)) && booleans.get(ctx.expr(1)));
         System.out.println("");
-    }
-
-    @Override
-    public void enterCmpExpr(@NotNull GrammarParser.CmpExprContext ctx) {
-        super.enterCmpExpr(ctx);
-
     }
 
     @Override
@@ -305,35 +330,43 @@ public class SprockelBuilder extends GrammarBaseListener {
                 booleans.put(ctx, booleans.get(ctx.expr(0)) != booleans.get(ctx.expr(1)));
             }
         }
+    }*/
+
+    private void saveToReg(Operand operand, Reg reg) {
+        emit(OpCode.CONST, operand, reg);
     }
 
-    @Override
-    public void enterType(@NotNull GrammarParser.TypeContext ctx) {
-        super.enterType(ctx);
+    private void saveToMemory(String name, Reg reg) {
+        emit(OpCode.PUSH, reg);
+        variablesInMemory.add(name);
     }
 
-    @Override
-    public void exitType(@NotNull GrammarParser.TypeContext ctx) {
-        super.exitType(ctx);
+    private void saveToMemory(String name, Reg reg, MemAddr addr) {
+        //Overwrite memory location, variable stays in memory so no need to add it again
+        emit(OpCode.STORE, reg, addr);
     }
 
-    @Override
-    public void enterEveryRule(@NotNull ParserRuleContext ctx) {
-        super.enterEveryRule(ctx);
+    private void loadFromMemory(String variable, Reg reg) {
+        int index = variablesInMemory.indexOf(variable);
+        //TODO Use index to calculate location of variable in memory
+        emit(OpCode.LOAD, new MemAddr(new Reg("SP")), reg);
     }
 
-    @Override
-    public void exitEveryRule(@NotNull ParserRuleContext ctx) {
-        super.exitEveryRule(ctx);
+    private Reg getEmptyRegister() {
+        if (usedRegisters == 5)
+            System.out.println("Warning: ran out of registers!");
+        String register = new String("Reg" + Character.toString((char) (65 + usedRegisters)));
+        usedRegisters++;
+        return new Reg(register);
     }
 
-    @Override
-    public void visitTerminal(@NotNull TerminalNode node) {
-        super.visitTerminal(node);
-    }
-
-    @Override
-    public void visitErrorNode(@NotNull ErrorNode node) {
-        super.visitErrorNode(node);
+    /**
+     * Constructs an operation from the parameters
+     * and adds it to the program under construction.
+     */
+    private Op emit(OpCode opCode, Operand... args) {
+        Op result = new Op(opCode, args);
+        program.addOp(result);
+        return result;
     }
 }

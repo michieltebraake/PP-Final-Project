@@ -3,7 +3,7 @@ package pp.finalproject.model;
 public class Reg extends Operand {
     private final String address;
 
-    protected Reg(String address) {
+    public Reg(String address) {
         super(Type.REG);
         this.address = address;
     }
@@ -22,5 +22,10 @@ public class Reg extends Operand {
 
         Reg other = (Reg) obj;
         return address.equals(other.getAddress());
+    }
+
+    @Override
+    public String toString() {
+        return address;
     }
 }

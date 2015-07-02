@@ -3,7 +3,7 @@ package pp.finalproject.model;
 public class Num extends Operand {
     private final int value;
 
-    protected Num(int value) {
+    public Num(int value) {
         super(Type.NUM);
         this.value = value;
     }
@@ -22,5 +22,10 @@ public class Num extends Operand {
 
         Num other = (Num) obj;
         return value == other.getValue();
+    }
+
+    @Override
+    public String toString() {
+        return Integer.toString(value);
     }
 }

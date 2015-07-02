@@ -4,16 +4,16 @@ public class MemAddr extends Operand {
     private final int address;
     private final Reg reg;
 
-    protected MemAddr(int address) {
+    public MemAddr(int address) {
         super(Type.MEMADDR);
         this.address = address;
         this.reg = null;
         //TODO Dit is pittig lelijk
     }
 
-    protected MemAddr (Reg reg) {
+    public MemAddr(Reg reg) {
         super(Type.MEMADDR);
-        this.address = 0;
+        this.address = -1;
         this.reg = reg;
     }
 
@@ -47,5 +47,13 @@ public class MemAddr extends Operand {
                 return address == other.getAddress();
             }
         }
+    }
+
+    @Override
+    public String toString() {
+        if (address != -1)
+            return Integer.toString(address);
+        else
+            return "(Deref " + reg.toString() + ")";
     }
 }

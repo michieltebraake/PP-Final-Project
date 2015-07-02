@@ -1,5 +1,7 @@
 package pp.finalproject.model;
 
+import org.apache.commons.lang3.text.WordUtils;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -45,6 +47,9 @@ public class Op {
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder();
+
+        result.append(WordUtils.capitalizeFully(opCode.toString()));
+        result.append(" ");
         for (Operand arg : args) {
             result.append(arg.toString());
             result.append(" ");

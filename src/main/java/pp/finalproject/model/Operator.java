@@ -3,7 +3,7 @@ package pp.finalproject.model;
 public class Operator extends Operand {
     private final OperatorType operatorType;
 
-    protected Operator(OperatorType operatorType) {
+    public Operator(OperatorType operatorType) {
         super(Type.OPERATOR);
         this.operatorType = operatorType;
     }
@@ -26,5 +26,10 @@ public class Operator extends Operand {
 
     public enum OperatorType {
         ADD, SUB, MUL, DIV, MOD, EQUAL, NEQ, GT, GTE, LT, LTE, AND, OR, XOR, LSHIFT, RSHIFT
+    }
+
+    @Override
+    public String toString() {
+        return operatorType.toString();
     }
 }
