@@ -5,7 +5,6 @@ import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import org.apache.commons.lang3.tuple.ImmutableTriple;
 import pp.finalproject.model.*;
 
 import java.io.File;
@@ -27,10 +26,13 @@ public class SprockelBuilder extends GrammarBaseListener {
 
     private ParseTreeProperty<Reg> resultRegisters = new ParseTreeProperty<>();
 
+    //Save current number of program lines at a node, needed to loop back in a while
+    private ParseTreeProperty<Integer> programLines = new ParseTreeProperty<>();
+
     private HashMap<String, MemAddr> memory = new HashMap<>();
 
     //Saves the location of branch & jump instructions needed for if statements. The values for this need to be filled in after the if statement
-    private ParseTreeProperty<ImmutableTriple<Op, Op, Integer>> branchLines = new ParseTreeProperty<>();
+    private ParseTreeProperty<Op> operators = new ParseTreeProperty<>();
 
     //private ParseTreeProperty<>
 
@@ -54,7 +56,7 @@ public class SprockelBuilder extends GrammarBaseListener {
         String filename;
         if (args.length == 0) {
             //System.err.println("Usage: [filename]+");
-            filename = "src\\test\\java\\example5";
+            filename = "src\\test\\java\\example6";
         } else {
             filename = args[0];
         }
@@ -138,11 +140,6 @@ public class SprockelBuilder extends GrammarBaseListener {
     }
 
     @Override
-    public void exitWhileStat(@NotNull GrammarParser.WhileStatContext ctx) {
-        super.exitWhileStat(ctx);
-    }
-
-    @Override
     public void exitProcedureStat(@NotNull GrammarParser.ProcedureStatContext ctx) {
         super.exitProcedureStat(ctx);
     }
@@ -184,37 +181,73 @@ public class SprockelBuilder extends GrammarBaseListener {
         super.exitArrayExpr(ctx);
     }
 
+    /* If statement */
+
+    @Override
+    public void exitIfcompare(@NotNull GrammarParser.IfcompareContext ctx) {
+        Reg reg = resultRegisters.get(ctx.expr());
+        emit(OpCode.BRANCH, reg, new Target(Target.TargetType.REL, 2));
+        releaseReg(reg);
+        super.exitIfcompare(ctx);
+    }
+
     @Override
     public void enterIfbody(@NotNull GrammarParser.IfbodyContext ctx) {
-        Op branch = emit(OpCode.BRANCH);
         Op jump = emit(OpCode.JUMP);
-        branchLines.put(ctx, new ImmutableTriple<>(branch, jump, program.opCount()));
 
+        programLines.put(ctx, program.opCount());
+        operators.put(ctx, jump);
         super.enterIfbody(ctx);
     }
 
     @Override
-    public void exitIfbody(@NotNull GrammarParser.IfbodyContext ctx) {
-        super.exitIfbody(ctx);
-    }
-
-    @Override
-    public void enterIfStat(@NotNull GrammarParser.IfStatContext ctx) {
-        super.enterIfStat(ctx);
-    }
-
-    @Override
     public void exitIfStat(@NotNull GrammarParser.IfStatContext ctx) {
-        Op branch = branchLines.get(ctx.ifbody()).getLeft();
-        Op jump = branchLines.get(ctx.ifbody()).getMiddle();
-        int opLines = branchLines.get(ctx.ifbody()).getRight();
+        Op jump = operators.get(ctx.ifbody());
+        int opLines = programLines.get(ctx.ifbody());
 
-        Reg reg = resultRegisters.get(ctx.expr());
-        branch.setArgs(reg, new Target(Target.TargetType.REL, 2));
         int jumpLines = program.opCount() - opLines;
         jump.setArgs(new Target(Target.TargetType.REL, jumpLines + 1));
-        releaseReg(reg);
         super.exitIfStat(ctx);
+    }
+
+    /* While statement */
+
+    @Override
+    public void exitWhilecompare(@NotNull GrammarParser.WhilecompareContext ctx) {
+        Reg reg = resultRegisters.get(ctx.expr());
+        emit(OpCode.BRANCH, reg, new Target(Target.TargetType.REL, 2));
+        releaseReg(reg);
+        super.exitWhilecompare(ctx);
+    }
+
+    @Override
+    public void enterWhilebody(@NotNull GrammarParser.WhilebodyContext ctx) {
+        Op jump = emit(OpCode.JUMP);
+
+        programLines.put(ctx, program.opCount());
+        operators.put(ctx, jump);
+        super.enterWhilebody(ctx);
+    }
+
+    @Override
+    public void enterWhileStat(@NotNull GrammarParser.WhileStatContext ctx) {
+        programLines.put(ctx, program.opCount());
+        super.enterWhileStat(ctx);
+    }
+
+    @Override
+    public void exitWhileStat(@NotNull GrammarParser.WhileStatContext ctx) {
+        Op jump = operators.get(ctx.whilebody());
+        int opLines = programLines.get(ctx.whilebody());
+
+        //Jump to skip while if compare was false
+        int jumpLines = program.opCount() - opLines;
+        jump.setArgs(new Target(Target.TargetType.REL, jumpLines + 2));
+
+        //Jump to loop back to compare
+        int loopLines = program.opCount() - programLines.get(ctx);
+        emit(OpCode.JUMP, new Target(Target.TargetType.REL, -(loopLines)));
+        super.exitWhileStat(ctx);
     }
 
     @Override

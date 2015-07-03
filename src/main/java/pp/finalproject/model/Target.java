@@ -34,7 +34,7 @@ public class Target extends Operand {
     @Override
     public String toString() {
         if (targetType == TargetType.REL)
-            return "(Rel " + value + ")";
+            return "(Rel (" + value + "))";
         //TODO This isn't finished
         return "" + value;
     }

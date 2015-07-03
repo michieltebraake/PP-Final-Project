@@ -9,13 +9,17 @@ stat: SHARED target ID SEMI #sharedDeclStat
     | target ID SEMI #declStat
     | target ID ASSIGN expr SEMI #declAssignStat
     | ID ASSIGN expr SEMI #assignStat
-    | IF LPAR expr RPAR LCURLY ifbody RCURLY #ifStat
-    | WHILE LPAR expr RPAR LCURLY stat* RCURLY #whileStat
+    | ifcompare LCURLY ifbody RCURLY #ifStat
+    | whilecompare LCURLY whilebody RCURLY #whileStat
     | procedure #procedureStat
     | ID LSQ expr RSQ ASSIGN expr SEMI #arrayAssignStat
     ;
 
+ifcompare: IF LPAR expr RPAR;
 ifbody: stat*;
+
+whilecompare: WHILE LPAR expr RPAR;
+whilebody: stat*;
 
 target: type
       | arraytype;

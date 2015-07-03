@@ -70,9 +70,7 @@ public class Util {
     public static void addDebugOutput(Program program, HashMap<String, MemAddr> memory) {
         int i = 1;
 
-
         List<MemAddr> addresses = new ArrayList<>(memory.values());
-
         Comparator<MemAddr> comparator = new Comparator<MemAddr>() {
             public int compare(MemAddr c1, MemAddr c2) {
                 return c1.getAddress() - c2.getAddress(); // use your logic
@@ -80,12 +78,10 @@ public class Util {
         };
 
         Collections.sort(addresses, comparator);
-
         for (MemAddr variable : addresses) {
             Reg reg = new Reg("Reg" + Character.toString((char) (64 + i)));
             i++;
             Op result = new Op(OpCode.LOAD, variable, reg);
-
 
             program.addOp(result);
 

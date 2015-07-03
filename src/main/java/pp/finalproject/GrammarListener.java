@@ -127,6 +127,16 @@ public interface GrammarListener extends ParseTreeListener {
 	 */
 	void exitArrayAssignStat(@NotNull GrammarParser.ArrayAssignStatContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link GrammarParser#ifcompare}.
+	 * @param ctx the parse tree
+	 */
+	void enterIfcompare(@NotNull GrammarParser.IfcompareContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link GrammarParser#ifcompare}.
+	 * @param ctx the parse tree
+	 */
+	void exitIfcompare(@NotNull GrammarParser.IfcompareContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link GrammarParser#ifbody}.
 	 * @param ctx the parse tree
 	 */
@@ -136,6 +146,26 @@ public interface GrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitIfbody(@NotNull GrammarParser.IfbodyContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link GrammarParser#whilecompare}.
+	 * @param ctx the parse tree
+	 */
+	void enterWhilecompare(@NotNull GrammarParser.WhilecompareContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link GrammarParser#whilecompare}.
+	 * @param ctx the parse tree
+	 */
+	void exitWhilecompare(@NotNull GrammarParser.WhilecompareContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link GrammarParser#whilebody}.
+	 * @param ctx the parse tree
+	 */
+	void enterWhilebody(@NotNull GrammarParser.WhilebodyContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link GrammarParser#whilebody}.
+	 * @param ctx the parse tree
+	 */
+	void exitWhilebody(@NotNull GrammarParser.WhilebodyContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link GrammarParser#target}.
 	 * @param ctx the parse tree
