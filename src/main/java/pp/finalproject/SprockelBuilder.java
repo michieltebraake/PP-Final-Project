@@ -54,7 +54,7 @@ public class SprockelBuilder extends GrammarBaseListener {
         String filename;
         if (args.length == 0) {
             //System.err.println("Usage: [filename]+");
-            filename = "src\\test\\java\\example";
+            filename = "src\\test\\java\\example5";
         } else {
             filename = args[0];
         }
@@ -82,6 +82,10 @@ public class SprockelBuilder extends GrammarBaseListener {
         System.out.println("Created program:");
         System.out.println(program.toString());
         System.out.println("Done.");
+
+        //Add debug output
+        Util.addDebugOutput(program, memory);
+
         Util.saveProgram(program);
         /*Runtime runtime = Runtime.getRuntime();
         try {
@@ -93,7 +97,8 @@ public class SprockelBuilder extends GrammarBaseListener {
 
     @Override
     public void exitProgram(@NotNull GrammarParser.ProgramContext ctx) {
-        emit(OpCode.ENDPROG);
+        //TODO Enable following line
+        //emit(OpCode.ENDPROG);
         super.exitProgram(ctx);
     }
 
@@ -119,16 +124,16 @@ public class SprockelBuilder extends GrammarBaseListener {
 
     @Override
     public void exitAssignStat(@NotNull GrammarParser.AssignStatContext ctx) {
-        //TODO Assigning a = b is not yet possible, right side of assign has to be an operand right now
-        //An assign statement always saves a value to a named variable, so save this to the heap
-        Reg reg = getEmptyRegister();
+        Reg reg = null;
         if (operands.get(ctx.expr()) != null) {
+            reg = getEmptyRegister();
             saveToReg(operands.get(ctx.expr()), reg);
-            saveToHeap(ctx.ID().getText(), reg);
+        } else if (resultRegisters.get(ctx.expr()) != null) {
+            reg = resultRegisters.get(ctx.expr());
+        } else if (variables.get(ctx.expr()) != null) {
+            reg = loadFromHeap(variables.get(ctx.expr()));
         }
-        //int memoryLocation = variablesInMemory.indexOf(ctx.ID().getText());
-        //TODO Override memory location?
-        //saveToHeap(ctx.ID().getText(), reg, new MemAddr(memoryLocation));
+        saveToHeap(ctx.ID().getText(), reg);
         super.exitAssignStat(ctx);
     }
 
@@ -205,9 +210,9 @@ public class SprockelBuilder extends GrammarBaseListener {
         int opLines = branchLines.get(ctx.ifbody()).getRight();
 
         Reg reg = resultRegisters.get(ctx.expr());
-        branch.setArgs(reg, new Target(Target.TargetType.REL, 1));
+        branch.setArgs(reg, new Target(Target.TargetType.REL, 2));
         int jumpLines = program.opCount() - opLines;
-        jump.setArgs(new Target(Target.TargetType.REL, jumpLines));
+        jump.setArgs(new Target(Target.TargetType.REL, jumpLines + 1));
         releaseReg(reg);
         super.exitIfStat(ctx);
     }
@@ -278,7 +283,6 @@ public class SprockelBuilder extends GrammarBaseListener {
     @Override
     public void exitCmpExpr(@NotNull GrammarParser.CmpExprContext ctx) {
         //LT | GT | LTE| | GTE | EQUAL | NOTEQUAL
-        //TODO Also here, get proper regs
         Reg reg1 = popOrGetOperator(ctx.expr(0));
         Reg reg2 = popOrGetOperator(ctx.expr(1));
         if (ctx.LT() != null) {
