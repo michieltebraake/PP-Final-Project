@@ -3,6 +3,10 @@ package pp.finalproject.model;
 public class Num extends Operand {
     private final int value;
 
+    public Num() {
+        this(0);
+    }
+
     public Num(int value) {
         super(Type.NUM);
         this.value = value;

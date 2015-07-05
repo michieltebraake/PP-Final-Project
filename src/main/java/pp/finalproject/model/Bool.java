@@ -3,6 +3,10 @@ package pp.finalproject.model;
 public class Bool extends Operand {
     private final boolean value;
 
+    public Bool() {
+        this(true);
+    }
+
     public Bool(boolean value) {
         super(Type.BOOL);
         this.value = value;
