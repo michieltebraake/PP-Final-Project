@@ -54,7 +54,6 @@ public class Util {
                     "  where\n" +
                     "    printrega SprState{..}\n" +
                     "      | instrs!pc == Nop = show regvalue\n" +
-                    "\t  | instrs!pc == EndProg = show regvalue\n" +
                     "      | otherwise = \"\"\n" +
                     "        where\n" +
                     "          regvalue = regbank ! reg\n" +
@@ -89,6 +88,10 @@ public class Util {
                 break;
         }
 
+
+        program.addOp(new Op(OpCode.READ, new MemAddr(1)));
+        program.addOp(new Op(OpCode.RECEIVE, new Reg("RegE")));
+        program.addOp(new Op(OpCode.NOP));
         program.addOp(new Op(OpCode.ENDPROG));
 
     }

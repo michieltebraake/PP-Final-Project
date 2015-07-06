@@ -19,29 +19,17 @@ public interface GrammarListener extends ParseTreeListener {
 	 */
 	void exitProgram(@NotNull GrammarParser.ProgramContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code sharedDeclStat}
+	 * Enter a parse tree produced by the {@code declAssignStat}
 	 * labeled alternative in {@link GrammarParser#stat}.
 	 * @param ctx the parse tree
 	 */
-	void enterSharedDeclStat(@NotNull GrammarParser.SharedDeclStatContext ctx);
+	void enterDeclAssignStat(@NotNull GrammarParser.DeclAssignStatContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code sharedDeclStat}
+	 * Exit a parse tree produced by the {@code declAssignStat}
 	 * labeled alternative in {@link GrammarParser#stat}.
 	 * @param ctx the parse tree
 	 */
-	void exitSharedDeclStat(@NotNull GrammarParser.SharedDeclStatContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code sharedDeclAssignStat}
-	 * labeled alternative in {@link GrammarParser#stat}.
-	 * @param ctx the parse tree
-	 */
-	void enterSharedDeclAssignStat(@NotNull GrammarParser.SharedDeclAssignStatContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code sharedDeclAssignStat}
-	 * labeled alternative in {@link GrammarParser#stat}.
-	 * @param ctx the parse tree
-	 */
-	void exitSharedDeclAssignStat(@NotNull GrammarParser.SharedDeclAssignStatContext ctx);
+	void exitDeclAssignStat(@NotNull GrammarParser.DeclAssignStatContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code declStat}
 	 * labeled alternative in {@link GrammarParser#stat}.
@@ -54,18 +42,6 @@ public interface GrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitDeclStat(@NotNull GrammarParser.DeclStatContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code declAssignStat}
-	 * labeled alternative in {@link GrammarParser#stat}.
-	 * @param ctx the parse tree
-	 */
-	void enterDeclAssignStat(@NotNull GrammarParser.DeclAssignStatContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code declAssignStat}
-	 * labeled alternative in {@link GrammarParser#stat}.
-	 * @param ctx the parse tree
-	 */
-	void exitDeclAssignStat(@NotNull GrammarParser.DeclAssignStatContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code assignStat}
 	 * labeled alternative in {@link GrammarParser#stat}.
@@ -114,6 +90,18 @@ public interface GrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitProcedureStat(@NotNull GrammarParser.ProcedureStatContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code synchronizedStat}
+	 * labeled alternative in {@link GrammarParser#stat}.
+	 * @param ctx the parse tree
+	 */
+	void enterSynchronizedStat(@NotNull GrammarParser.SynchronizedStatContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code synchronizedStat}
+	 * labeled alternative in {@link GrammarParser#stat}.
+	 * @param ctx the parse tree
+	 */
+	void exitSynchronizedStat(@NotNull GrammarParser.SynchronizedStatContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code arrayAssignStat}
 	 * labeled alternative in {@link GrammarParser#stat}.
@@ -166,6 +154,16 @@ public interface GrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitWhilebody(@NotNull GrammarParser.WhilebodyContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link GrammarParser#synchronizedbody}.
+	 * @param ctx the parse tree
+	 */
+	void enterSynchronizedbody(@NotNull GrammarParser.SynchronizedbodyContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link GrammarParser#synchronizedbody}.
+	 * @param ctx the parse tree
+	 */
+	void exitSynchronizedbody(@NotNull GrammarParser.SynchronizedbodyContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link GrammarParser#target}.
 	 * @param ctx the parse tree

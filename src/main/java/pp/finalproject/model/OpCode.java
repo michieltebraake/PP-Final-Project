@@ -36,7 +36,7 @@ public enum OpCode {
 
     WRITE(REG, MEMADDR),
 
-    TESTANDSET(MEMADDR);
+    TESTANDSET("TestAndSet", MEMADDR);
 
     private List<Operand.Type> sig;
     private String alias;

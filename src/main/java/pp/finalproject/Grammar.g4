@@ -4,14 +4,13 @@ grammar Grammar;
 
 program: stat+;
 
-stat: SHARED target ID SEMI #sharedDeclStat
-    | SHARED target ID ASSIGN expr SEMI #sharedDeclAssignStat
-    | target ID SEMI #declStat
-    | target ID ASSIGN expr SEMI #declAssignStat
+stat: (SHARED target | target) ID ASSIGN expr SEMI #declAssignStat
+    | (SHARED target | target) ID SEMI #declStat
     | ID ASSIGN expr SEMI #assignStat
     | ifcompare LCURLY ifbody RCURLY #ifStat
     | whilecompare LCURLY whilebody RCURLY #whileStat
     | procedure #procedureStat
+    | SYNCHRONIZED LCURLY synchronizedbody RCURLY #synchronizedStat
     | ID LSQ expr RSQ ASSIGN expr SEMI #arrayAssignStat
     ;
 
@@ -20,6 +19,8 @@ ifbody: stat*;
 
 whilecompare: WHILE LPAR expr RPAR;
 whilebody: stat*;
+
+synchronizedbody: stat*;
 
 target: type
       | arraytype;
@@ -53,6 +54,7 @@ IF: 'if';
 WHILE: 'while';
 SHARED: 'shared';
 PROCEDURE: 'procedure';
+SYNCHRONIZED: 'synchronized';
 
 TRUE: 'true';
 FALSE: 'false';

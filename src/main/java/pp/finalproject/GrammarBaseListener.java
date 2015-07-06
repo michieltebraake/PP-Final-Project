@@ -29,25 +29,13 @@ public class GrammarBaseListener implements GrammarListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterSharedDeclStat(@NotNull GrammarParser.SharedDeclStatContext ctx) { }
+	@Override public void enterDeclAssignStat(@NotNull GrammarParser.DeclAssignStatContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitSharedDeclStat(@NotNull GrammarParser.SharedDeclStatContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterSharedDeclAssignStat(@NotNull GrammarParser.SharedDeclAssignStatContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitSharedDeclAssignStat(@NotNull GrammarParser.SharedDeclAssignStatContext ctx) { }
+	@Override public void exitDeclAssignStat(@NotNull GrammarParser.DeclAssignStatContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -60,18 +48,6 @@ public class GrammarBaseListener implements GrammarListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitDeclStat(@NotNull GrammarParser.DeclStatContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterDeclAssignStat(@NotNull GrammarParser.DeclAssignStatContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitDeclAssignStat(@NotNull GrammarParser.DeclAssignStatContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -120,6 +96,18 @@ public class GrammarBaseListener implements GrammarListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitProcedureStat(@NotNull GrammarParser.ProcedureStatContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterSynchronizedStat(@NotNull GrammarParser.SynchronizedStatContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitSynchronizedStat(@NotNull GrammarParser.SynchronizedStatContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -180,6 +168,18 @@ public class GrammarBaseListener implements GrammarListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitWhilebody(@NotNull GrammarParser.WhilebodyContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterSynchronizedbody(@NotNull GrammarParser.SynchronizedbodyContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitSynchronizedbody(@NotNull GrammarParser.SynchronizedbodyContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
