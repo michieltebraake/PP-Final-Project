@@ -257,7 +257,7 @@ public class SprockelBuilder extends GrammarBaseListener {
         } else if (resultRegisters.get(ctx.expr(0)) != null) {
             arrayIndex = resultRegisters.get(ctx.expr(0));
         } else if (variables.get(ctx.expr(0)) != null) {
-            arrayIndex = loadFromHeap(variables.get(ctx.expr(0)), shared);
+            arrayIndex = loadFromHeap(variables.get(ctx.expr(0)), sharedMemory.containsKey(variables.get(ctx.expr(0))));
         }
 
         emit(OpCode.COMPUTE, new Operator(Operator.OperatorType.ADD), startAddressReg, arrayIndex, arrayIndex);
