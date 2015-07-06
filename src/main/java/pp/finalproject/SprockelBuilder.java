@@ -91,6 +91,13 @@ public class SprockelBuilder extends GrammarBaseListener {
 
             if (parser.getNumberOfSyntaxErrors() != 0)
                 return;
+
+           // new TypeChecker().check(tree);
+            //TODO Remove following lines
+            //boolean test = true;
+            //if (test)
+            //    return;
+
             ParseTreeWalker walker = new ParseTreeWalker();
             walker.walk(this, tree);
         } catch (IOException e) {
@@ -238,11 +245,10 @@ public class SprockelBuilder extends GrammarBaseListener {
 
     @Override
     public void exitArrayAssignStat(@NotNull GrammarParser.ArrayAssignStatContext ctx) {
-        boolean shared = sharedMemory.containsKey(ctx.ID().getText());
+        boolean shared = sharedMemory.containsKey(ctx.ID().getText() + "0");
+
         //Load proper array value from memory
-        MemAddr startAddress = memory.get(ctx.ID().getText() + "0");
-        Reg startAddressReg = getEmptyRegister();
-        emit(OpCode.CONST, new Num(startAddress.getAddress()), startAddressReg);
+        Reg startAddressReg = loadFromHeap(ctx.ID().getText() + "0", shared);
 
         Reg arrayIndex = null;
         if (operands.get(ctx.expr(0)) != null) {
@@ -324,22 +330,9 @@ public class SprockelBuilder extends GrammarBaseListener {
 
     @Override
     public void exitArrayExpr(@NotNull GrammarParser.ArrayExprContext ctx) {
-        boolean shared = sharedMemory.containsKey(ctx.ID().getText());
-        //Get array
-        MemAddr startAddress = memory.get(ctx.ID().getText() + "0");
-        startAddress.getAddress();
-        Reg startAddressReg = getEmptyRegister();
-        emit(OpCode.CONST, new Num(startAddress.getAddress()), startAddressReg);
+        boolean shared = sharedMemory.containsKey(ctx.ID().getText() + "0");
 
-        /*Reg startAddressReg = null;
-        if (operands.get(ctx.expr()) != null) {
-            startAddressReg = getEmptyRegister();
-            saveToReg(operands.get(ctx.expr()), startAddressReg);
-        } else if (resultRegisters.get(ctx.expr()) != null) {
-            startAddressReg = resultRegisters.get(ctx.expr());
-        } else if (variables.get(ctx.expr()) != null) {
-            startAddressReg = loadFromHeap(variables.get(ctx.expr()));
-        }*/
+        Reg startAddress = loadFromHeap(ctx.ID().getText() + "0", shared);
 
         Reg reg = null;
         if (operands.get(ctx.expr()) != null) {
@@ -351,8 +344,8 @@ public class SprockelBuilder extends GrammarBaseListener {
             reg = loadFromHeap(variables.get(ctx.expr()), shared);
         }
 
-        emit(OpCode.COMPUTE, new Operator(Operator.OperatorType.ADD), startAddressReg, reg, reg);
-        releaseReg(startAddressReg);
+        emit(OpCode.COMPUTE, new Operator(Operator.OperatorType.ADD), startAddress, reg, reg);
+        releaseReg(startAddress);
         Reg outputReg = getEmptyRegister();
         emit(OpCode.LOAD, new MemAddr(reg), outputReg);
         releaseReg(reg);
