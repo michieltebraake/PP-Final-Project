@@ -22,11 +22,10 @@ public class TypeChecker extends GrammarBaseListener {
     public void check(ParseTree tree) {
         ParseTreeWalker walker = new ParseTreeWalker();
         walker.walk(this, tree);
+    }
 
-        System.out.println("Found errors:");
-        for (Exception error : errors) {
-            System.out.println(error);
-        }
+    public List<Exception> getErrors() {
+        return errors;
     }
 
     @Override
@@ -77,8 +76,8 @@ public class TypeChecker extends GrammarBaseListener {
 
     @Override
     public void exitAssignStat(@NotNull GrammarParser.AssignStatContext ctx) {
-        Operand.Type assignOperand = operands.get(ctx.expr());
         Operand.Type variableOperand = operands.get(variables.get(ctx.ID().getText()));
+        Operand.Type assignOperand = operands.get(ctx.expr());
         if (variableOperand != assignOperand) {
             errors.add(new TypeException(ctx, variableOperand, assignOperand));
         }
@@ -87,11 +86,17 @@ public class TypeChecker extends GrammarBaseListener {
 
     @Override
     public void exitIfStat(@NotNull GrammarParser.IfStatContext ctx) {
+        if (operands.get(ctx.ifcompare().expr()) != Operand.Type.BOOL) {
+            errors.add(new TypeException(ctx, Operand.Type.BOOL, operands.get(ctx.ifcompare().expr())));
+        }
         super.exitIfStat(ctx);
     }
 
     @Override
     public void exitWhileStat(@NotNull GrammarParser.WhileStatContext ctx) {
+        if (operands.get(ctx.whilecompare().expr()) != Operand.Type.BOOL) {
+            errors.add(new TypeException(ctx, Operand.Type.BOOL, operands.get(ctx.whilecompare().expr())));
+        }
         super.exitWhileStat(ctx);
     }
 
@@ -107,24 +112,21 @@ public class TypeChecker extends GrammarBaseListener {
 
     @Override
     public void exitArrayAssignStat(@NotNull GrammarParser.ArrayAssignStatContext ctx) {
-        Operand.Type operand = operands.get(variables.get(ctx.ID().getText()));
+        if (operands.get(ctx.expr(0)) != Operand.Type.NUM) {
+            errors.add(new TypeException(ctx, Operand.Type.NUM, operands.get(ctx.expr(0))));
+        }
 
+        Operand.Type variableOperand = operands.get(variables.get(ctx.ID().getText()));
+        Operand.Type assignOperand = operands.get(ctx.expr(1));
+        if (assignOperand != variableOperand) {
+            errors.add(new TypeException(ctx, variableOperand, assignOperand));
+        }
         super.exitArrayAssignStat(ctx);
-    }
-
-    @Override
-    public void exitIfcompare(@NotNull GrammarParser.IfcompareContext ctx) {
-        super.exitIfcompare(ctx);
     }
 
     @Override
     public void exitIfbody(@NotNull GrammarParser.IfbodyContext ctx) {
         super.exitIfbody(ctx);
-    }
-
-    @Override
-    public void exitWhilecompare(@NotNull GrammarParser.WhilecompareContext ctx) {
-        super.exitWhilecompare(ctx);
     }
 
     @Override
@@ -144,6 +146,9 @@ public class TypeChecker extends GrammarBaseListener {
 
     @Override
     public void exitArraytype(@NotNull GrammarParser.ArraytypeContext ctx) {
+        if (ctx.expr() != null && operands.get(ctx.expr()) != Operand.Type.NUM) {
+            errors.add(new TypeException(ctx.getStart().getLine(), ctx.getStart().getCharPositionInLine(), Operand.Type.NUM, operands.get(ctx.expr())));
+        }
         super.exitArraytype(ctx);
     }
 

@@ -6,6 +6,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import pp.finalproject.model.*;
+import pp.finalproject.typecheck.TypeChecker;
 
 import java.io.File;
 import java.io.FileReader;
@@ -59,7 +60,7 @@ public class SprockelBuilder extends GrammarBaseListener {
         String filename;
         if (args.length == 0) {
             //System.err.println("Usage: [filename]+");
-            filename = "src\\test\\java\\typecheckexample";
+            filename = "src\\test\\java\\example14";
         } else {
             filename = args[0];
         }
@@ -92,11 +93,15 @@ public class SprockelBuilder extends GrammarBaseListener {
             if (parser.getNumberOfSyntaxErrors() != 0)
                 return;
 
-            //new TypeChecker().check(tree);
-            //TODO Remove following lines
-            //boolean test = true;
-            //if (test)
-            //return;
+            TypeChecker typeChecker = new TypeChecker();
+            typeChecker.check(tree);
+            if (!typeChecker.getErrors().isEmpty()) {
+                System.out.println("Program contains errors:");
+                for (Exception error : typeChecker.getErrors()) {
+                    System.out.println(error);
+                }
+                //return;
+            }
 
             ParseTreeWalker walker = new ParseTreeWalker();
             walker.walk(this, tree);
