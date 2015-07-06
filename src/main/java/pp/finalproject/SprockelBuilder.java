@@ -308,11 +308,6 @@ public class SprockelBuilder extends GrammarBaseListener {
     }
 
     @Override
-    public void exitProcedureStat(@NotNull GrammarParser.ProcedureStatContext ctx) {
-        super.exitProcedureStat(ctx);
-    }
-
-    @Override
     public void exitTarget(@NotNull GrammarParser.TargetContext ctx) {
         super.exitTarget(ctx);
     }
@@ -320,16 +315,6 @@ public class SprockelBuilder extends GrammarBaseListener {
     @Override
     public void exitArraytype(@NotNull GrammarParser.ArraytypeContext ctx) {
         super.exitArraytype(ctx);
-    }
-
-    @Override
-    public void exitNoParamProcedure(@NotNull GrammarParser.NoParamProcedureContext ctx) {
-        super.exitNoParamProcedure(ctx);
-    }
-
-    @Override
-    public void exitParamProcedure(@NotNull GrammarParser.ParamProcedureContext ctx) {
-        super.exitParamProcedure(ctx);
     }
 
     @Override
@@ -465,8 +450,6 @@ public class SprockelBuilder extends GrammarBaseListener {
         emit(OpCode.JUMP, new Target(Target.TargetType.REL, -(loopLines)));
         super.exitWhileStat(ctx);
     }
-
-    //TODO array[2] creates a 3 element array?
 
     /* Concurreny */
     @Override

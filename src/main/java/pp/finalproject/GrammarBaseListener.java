@@ -89,18 +89,6 @@ public class GrammarBaseListener implements GrammarListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterProcedureStat(@NotNull GrammarParser.ProcedureStatContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitProcedureStat(@NotNull GrammarParser.ProcedureStatContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterSynchronizedStat(@NotNull GrammarParser.SynchronizedStatContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -204,30 +192,6 @@ public class GrammarBaseListener implements GrammarListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitArraytype(@NotNull GrammarParser.ArraytypeContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterNoParamProcedure(@NotNull GrammarParser.NoParamProcedureContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitNoParamProcedure(@NotNull GrammarParser.NoParamProcedureContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterParamProcedure(@NotNull GrammarParser.ParamProcedureContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitParamProcedure(@NotNull GrammarParser.ParamProcedureContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

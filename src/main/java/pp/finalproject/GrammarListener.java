@@ -79,18 +79,6 @@ public interface GrammarListener extends ParseTreeListener {
 	 */
 	void exitWhileStat(@NotNull GrammarParser.WhileStatContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code procedureStat}
-	 * labeled alternative in {@link GrammarParser#stat}.
-	 * @param ctx the parse tree
-	 */
-	void enterProcedureStat(@NotNull GrammarParser.ProcedureStatContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code procedureStat}
-	 * labeled alternative in {@link GrammarParser#stat}.
-	 * @param ctx the parse tree
-	 */
-	void exitProcedureStat(@NotNull GrammarParser.ProcedureStatContext ctx);
-	/**
 	 * Enter a parse tree produced by the {@code synchronizedStat}
 	 * labeled alternative in {@link GrammarParser#stat}.
 	 * @param ctx the parse tree
@@ -184,30 +172,6 @@ public interface GrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitArraytype(@NotNull GrammarParser.ArraytypeContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code noParamProcedure}
-	 * labeled alternative in {@link GrammarParser#procedure}.
-	 * @param ctx the parse tree
-	 */
-	void enterNoParamProcedure(@NotNull GrammarParser.NoParamProcedureContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code noParamProcedure}
-	 * labeled alternative in {@link GrammarParser#procedure}.
-	 * @param ctx the parse tree
-	 */
-	void exitNoParamProcedure(@NotNull GrammarParser.NoParamProcedureContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code paramProcedure}
-	 * labeled alternative in {@link GrammarParser#procedure}.
-	 * @param ctx the parse tree
-	 */
-	void enterParamProcedure(@NotNull GrammarParser.ParamProcedureContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code paramProcedure}
-	 * labeled alternative in {@link GrammarParser#procedure}.
-	 * @param ctx the parse tree
-	 */
-	void exitParamProcedure(@NotNull GrammarParser.ParamProcedureContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code parExpr}
 	 * labeled alternative in {@link GrammarParser#expr}.

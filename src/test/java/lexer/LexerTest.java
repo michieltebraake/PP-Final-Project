@@ -23,7 +23,7 @@ public class LexerTest {
         // Set of accepted characters
         lt.correct("abcdefghijklmnopqrstuvw");
         lt.correct("ABCDEFGHIJKLMNOPQRSTUVW");
-        lt.correct(",<>[]{}+=-()*%");
+        lt.correct(",<>[]{}+=-()*");
 
         // Denied as single characters, however accepted in combination with other operators as shown in
         // comparatorAndOperatorTest().
@@ -33,10 +33,10 @@ public class LexerTest {
         lt.wrong(":.\"'/\\?~@#$^");
 
         // Generic...
-        lt.correct("The lexer will accept pretty much all of these tokens as IDs, - + * % / = >=");
+        lt.correct("The lexer will accept pretty much all of these tokens as IDs, - + * / = >=");
         lt.wrong("It will fail to tokenize this though, since it contains a period.");
-        lt.yields("The lexer will accept pretty much all of these tokens as IDs, - + * % / = >=", ID, ID, ID, ID, ID,
-                ID, ID, ID, ID, ID, ID, ID, COMMA, MINUS, PLUS, TIMES, MODULO, DIVIDE, ASSIGN, GTE);
+        lt.yields("The lexer will accept pretty much all of these tokens as IDs, - + * / = >=", ID, ID, ID, ID, ID,
+                ID, ID, ID, ID, ID, ID, ID, COMMA, MINUS, PLUS, TIMES, DIVIDE, ASSIGN, GTE);
     }
 
     /*
@@ -47,7 +47,6 @@ public class LexerTest {
     public void testKeywords() {
         lt.yields("if IF iF If", IF, ID, ID, ID);
         lt.yields("while WHILE While WhIlE", WHILE, ID, ID, ID);
-        lt.yields("procedure PROCEDURE Procedure PrOcEdUre", PROCEDURE, ID, ID, ID);
         lt.yields("shared SHARED Shared ShArEd", SHARED, ID, ID, ID);
     }
 
@@ -75,8 +74,8 @@ public class LexerTest {
         lt.yields("=>", ASSIGN, GT);
         lt.yields("=<", ASSIGN, LT);
 
-        lt.yields("== != < <= > >= = || && ; (", EQUAL, NOTEQUAL, LT, LTE, GT, GTE, ASSIGN, OR, AND, SEMI, LPAR);
-        lt.yields(") { } [ ] + - * / % ,", RPAR, LCURLY, RCURLY, LSQ, RSQ, PLUS, MINUS, TIMES, DIVIDE, MODULO, COMMA);
+        lt.yields("== < <= > >= = || && ; (", EQUAL, LT, LTE, GT, GTE, ASSIGN, OR, AND, SEMI, LPAR);
+        lt.yields(") { } [ ] + - * / % ,", RPAR, LCURLY, RCURLY, LSQ, RSQ, PLUS, MINUS, TIMES, DIVIDE, COMMA);
         lt.yields("");
     }
 

@@ -9,7 +9,6 @@ stat: (SHARED target | target) ID ASSIGN expr SEMI #declAssignStat
     | ID ASSIGN expr SEMI #assignStat
     | ifcompare LCURLY ifbody RCURLY #ifStat
     | whilecompare LCURLY whilebody RCURLY #whileStat
-    | procedure #procedureStat
     | SYNCHRONIZED LCURLY synchronizedbody RCURLY #synchronizedStat
     | ID LSQ expr RSQ ASSIGN expr SEMI #arrayAssignStat
     ;
@@ -28,15 +27,11 @@ target: type
 arraytype: type LSQ expr RSQ
          | type LSQ RSQ;
 
-procedure: PROCEDURE ID LPAR RPAR LCURLY stat* RCURLY #noParamProcedure
-         | PROCEDURE ID LPAR (target ID (COMMA target ID)*)* RPAR LCURLY stat* RCURLY #paramProcedure
-         ;
-
 expr: (NUM | TRUE | FALSE) #constExpr
-    | expr (TIMES | DIVIDE | MODULO) expr #timesDivideExpr
+    | expr (TIMES | DIVIDE) expr #timesDivideExpr
     | MINUS expr #minusExpr
     | expr (PLUS | MINUS) expr #plusMinusExpr
-    | expr (LT | GT | LTE| | GTE | EQUAL | NOTEQUAL) expr #cmpExpr
+    | expr (LT | GT | LTE| | GTE | EQUAL) expr #cmpExpr
     | LPAR expr RPAR #parExpr
     | LCURLY expr (COMMA expr)* RCURLY #arrayAssignExpr
     | expr OR expr  #orExpr
@@ -54,14 +49,12 @@ BOOL: 'boolean';
 IF: 'if';
 WHILE: 'while';
 SHARED: 'shared';
-PROCEDURE: 'procedure';
 SYNCHRONIZED: 'synchronized';
 
 TRUE: 'true';
 FALSE: 'false';
 
 EQUAL: '==';
-NOTEQUAL: '!=';
 LT: '<';
 LTE: '<=';
 GT: '>';
@@ -81,7 +74,6 @@ PLUS: '+';
 MINUS: '-';
 TIMES: '*';
 DIVIDE: '/';
-MODULO: '%';
 COMMA: ',';
 SPID: 'spid';
 

@@ -14,7 +14,6 @@ public class Util {
             PrintWriter writer = new PrintWriter("../sprockell/src/test.hs", "UTF-8");
             writer.println("{-# LANGUAGE RecordWildCards #-}\n" +
                     "import Sprockell.System\n" +
-                    "loopCount = 10\n" +
                     "\n" +
                     "prog :: [Instruction]\n" +
                     "prog = [\n");

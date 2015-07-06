@@ -101,11 +101,6 @@ public class TypeChecker extends GrammarBaseListener {
     }
 
     @Override
-    public void exitProcedureStat(@NotNull GrammarParser.ProcedureStatContext ctx) {
-        super.exitProcedureStat(ctx);
-    }
-
-    @Override
     public void exitSynchronizedStat(@NotNull GrammarParser.SynchronizedStatContext ctx) {
         super.exitSynchronizedStat(ctx);
     }
@@ -150,16 +145,6 @@ public class TypeChecker extends GrammarBaseListener {
             errors.add(new TypeException(ctx.getStart().getLine(), ctx.getStart().getCharPositionInLine(), Operand.Type.NUM, operands.get(ctx.expr())));
         }
         super.exitArraytype(ctx);
-    }
-
-    @Override
-    public void exitNoParamProcedure(@NotNull GrammarParser.NoParamProcedureContext ctx) {
-        super.exitNoParamProcedure(ctx);
-    }
-
-    @Override
-    public void exitParamProcedure(@NotNull GrammarParser.ParamProcedureContext ctx) {
-        super.exitParamProcedure(ctx);
     }
 
     @Override
@@ -279,8 +264,6 @@ public class TypeChecker extends GrammarBaseListener {
             if (operands.get(ctx.expr(0)) != operands.get(ctx.expr(1))) {
                 if (ctx.EQUAL() != null) {
                     errors.add(new OperandException(Operator.OperatorType.EQUAL, ctx, ctx.expr(0), ctx.expr(1)));
-                } else if (ctx.NOTEQUAL() != null) {
-                    errors.add(new OperandException(Operator.OperatorType.NEQ, ctx, ctx.expr(0), ctx.expr(1)));
                 }
             }
         }
