@@ -58,7 +58,7 @@ public class SprockelBuilder extends GrammarBaseListener {
         String filename;
         if (args.length == 0) {
             //System.err.println("Usage: [filename]+");
-            filename = "src\\test\\java\\example10";
+            filename = "src\\test\\java\\example11";
         } else {
             filename = args[0];
         }
@@ -147,7 +147,6 @@ public class SprockelBuilder extends GrammarBaseListener {
                 saveToHeap(ctx.ID().getText() + i, tempReg);}
         }
 
-        //TODO Implement this, save with default value (see drive, this is ez to do)
         super.exitDeclStat(ctx);
     }
 
@@ -355,7 +354,15 @@ public class SprockelBuilder extends GrammarBaseListener {
 
     @Override
     public void exitIfcompare(@NotNull GrammarParser.IfcompareContext ctx) {
-        Reg reg = resultRegisters.get(ctx.expr());
+        Reg reg = null;
+        if (operands.get(ctx.expr()) != null) {
+            reg = getEmptyRegister();
+            saveToReg(operands.get(ctx.expr()), reg);
+        } else if (resultRegisters.get(ctx.expr()) != null) {
+            reg = resultRegisters.get(ctx.expr());
+        } else if (variables.get(ctx.expr()) != null) {
+            reg = loadFromHeap(variables.get(ctx.expr()));
+        }
         emit(OpCode.BRANCH, reg, new Target(Target.TargetType.REL, 2));
         releaseReg(reg);
         super.exitIfcompare(ctx);
@@ -384,7 +391,15 @@ public class SprockelBuilder extends GrammarBaseListener {
 
     @Override
     public void exitWhilecompare(@NotNull GrammarParser.WhilecompareContext ctx) {
-        Reg reg = resultRegisters.get(ctx.expr());
+        Reg reg = null;
+        if (operands.get(ctx.expr()) != null) {
+            reg = getEmptyRegister();
+            saveToReg(operands.get(ctx.expr()), reg);
+        } else if (resultRegisters.get(ctx.expr()) != null) {
+            reg = resultRegisters.get(ctx.expr());
+        } else if (variables.get(ctx.expr()) != null) {
+            reg = loadFromHeap(variables.get(ctx.expr()));
+        }
         emit(OpCode.BRANCH, reg, new Target(Target.TargetType.REL, 2));
         releaseReg(reg);
         super.exitWhilecompare(ctx);

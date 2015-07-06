@@ -1,0 +1,8 @@
+integer a = 5;
+boolean c = true;
+while (c) {
+    if (a - 10 == 0) {
+        c = false;
+    }
+    a = a + 1;
+}

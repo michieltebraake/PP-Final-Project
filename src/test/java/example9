@@ -1,2 +1,2 @@
 integer i = 5;
-integer[] test = {3, i, (2 * 10)};
+integer[] test = {3, i, (2 * 10), (6 / 3), (8 - 4)};
