@@ -1,0 +1,6 @@
+integer a = 5;
+boolean b = true;
+integer c = -true;
+integer d = 3 + true;
+boolean e = 3 || false;
+boolean f = 3 < false || e > 12 || 3 <= true || 4 >= true;
