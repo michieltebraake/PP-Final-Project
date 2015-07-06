@@ -1,0 +1,2 @@
+integer i = spid;
+boolean a = spid == 0;

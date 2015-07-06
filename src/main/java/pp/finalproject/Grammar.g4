@@ -42,6 +42,7 @@ expr: (NUM | TRUE | FALSE) #constExpr
     | expr OR expr  #orExpr
     | expr AND expr #andExpr
     | ID LSQ expr RSQ #arrayExpr
+    | SPID #spidExpr
     | ID #idExpr
     ;
 
@@ -82,6 +83,7 @@ TIMES: '*';
 DIVIDE: '/';
 MODULO: '%';
 COMMA: ',';
+SPID: 'spid';
 
 fragment LETTER: [a-zA-Z];
 fragment DIGIT: [0-9];

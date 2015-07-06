@@ -59,7 +59,7 @@ public class SprockelBuilder extends GrammarBaseListener {
         String filename;
         if (args.length == 0) {
             //System.err.println("Usage: [filename]+");
-            filename = "src\\test\\java\\example12";
+            filename = "src\\test\\java\\example14";
         } else {
             filename = args[0];
         }
@@ -74,11 +74,23 @@ public class SprockelBuilder extends GrammarBaseListener {
             CharStream chars = new ANTLRInputStream(new FileReader(file));
             Lexer lexer = new GrammarLexer(chars);
             lexer.removeErrorListeners();
-            //lexer.addErrorListener(listener);
+
             TokenStream tokens = new CommonTokenStream(lexer);
 
             GrammarParser parser = new GrammarParser(tokens);
             ParseTree tree = parser.program();
+            parser.removeErrorListeners();
+            //TODO This error listener doesn't really work well, fix it?
+            //TODO Add errors to an array and make it possible to return that for automated testing?
+            parser.addErrorListener(new BaseErrorListener() {
+                @Override
+                public void syntaxError(Recognizer<?, ?> recognizer, Object o, int i, int i1, String s, RecognitionException e) {
+                    System.out.println("Syntax error: " + s);
+                }
+            });
+
+            if (parser.getNumberOfSyntaxErrors() != 0)
+                return;
             ParseTreeWalker walker = new ParseTreeWalker();
             walker.walk(this, tree);
         } catch (IOException e) {
@@ -515,6 +527,12 @@ public class SprockelBuilder extends GrammarBaseListener {
             operands.put(ctx, new Bool(false));
         }
         super.exitConstExpr(ctx);
+    }
+
+    @Override
+    public void exitSpidExpr(@NotNull GrammarParser.SpidExprContext ctx) {
+        resultRegisters.put(ctx, new Reg("SPID"));
+        super.exitSpidExpr(ctx);
     }
 
     @Override

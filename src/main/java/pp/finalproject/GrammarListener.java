@@ -281,6 +281,18 @@ public interface GrammarListener extends ParseTreeListener {
 	 */
 	void exitMinusExpr(@NotNull GrammarParser.MinusExprContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code spidExpr}
+	 * labeled alternative in {@link GrammarParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterSpidExpr(@NotNull GrammarParser.SpidExprContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code spidExpr}
+	 * labeled alternative in {@link GrammarParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitSpidExpr(@NotNull GrammarParser.SpidExprContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code arrayAssignExpr}
 	 * labeled alternative in {@link GrammarParser#expr}.
 	 * @param ctx the parse tree
