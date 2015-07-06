@@ -1,8 +1,10 @@
-integer a = 5;
+integer a = -5;
+integer i = 0;
 boolean c = true;
 while (c) {
     if (a - 10 == 0) {
         c = false;
     }
     a = a + 1;
+    i = i + 1;
 }
