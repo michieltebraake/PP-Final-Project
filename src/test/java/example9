@@ -1,0 +1,2 @@
+integer i = 5;
+integer[] test = {3, i, (2 * 10)};

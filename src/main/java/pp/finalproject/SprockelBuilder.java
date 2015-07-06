@@ -26,6 +26,8 @@ public class SprockelBuilder extends GrammarBaseListener {
 
     private ParseTreeProperty<Reg> resultRegisters = new ParseTreeProperty<>();
 
+    private ParseTreeProperty<List<Object>> arrayAssign = new ParseTreeProperty<>();
+
     //Save current number of program lines at a node, needed to loop back in a while
     private ParseTreeProperty<Integer> programLines = new ParseTreeProperty<>();
 
@@ -56,7 +58,7 @@ public class SprockelBuilder extends GrammarBaseListener {
         String filename;
         if (args.length == 0) {
             //System.err.println("Usage: [filename]+");
-            filename = "src\\test\\java\\example7";
+            filename = "src\\test\\java\\example10";
         } else {
             filename = args[0];
         }
@@ -133,18 +135,16 @@ public class SprockelBuilder extends GrammarBaseListener {
                 if (operands.get(expr) != null) {
                     arraySize = ((Num) operands.get(expr)).getValue();
                 }
-            } else {
-                reg = getEmptyRegister();
-                saveToReg(new Num(16), reg);
-            }
-            OperandArray operandArray;
-            if (arrayType.BOOL() != null) {
-                operandArray = new OperandArray<>(Bool.class, arraySize);
-            } else {
-                operandArray = new OperandArray<>(Num.class, arraySize);
             }
 
-            saveToHeap(ctx.ID().getText(), operandArray);
+            for (int i = 0; i <= arraySize; i++) {
+                Reg tempReg = getEmptyRegister();
+                if (arrayType.BOOL() != null) {
+                    saveToReg(new Bool(), tempReg);
+                } else {
+                    saveToReg(new Num(), tempReg);
+                }
+                saveToHeap(ctx.ID().getText() + i, tempReg);}
         }
 
         //TODO Implement this, save with default value (see drive, this is ez to do)
@@ -158,6 +158,29 @@ public class SprockelBuilder extends GrammarBaseListener {
 
     @Override
     public void exitDeclAssignStat(@NotNull GrammarParser.DeclAssignStatContext ctx) {
+        //When assigning an array
+        if (arrayAssign.get(ctx.expr()) != null) {
+            List<Object> arrayContents = arrayAssign.get(ctx.expr());
+            if (ctx.expr() instanceof GrammarParser.ArrayAssignExprContext) {
+                int i = 0;
+                for (Object object : arrayContents) {
+                    if (object instanceof Reg) {
+                        saveToHeap(ctx.ID().getText() + i, (Reg) object);
+                    } else if (object instanceof Operand) {
+                        Reg reg = getEmptyRegister();
+                        saveToReg((Operand) object, reg);
+                        saveToHeap(ctx.ID().getText() + i, reg);
+                    }  else if (object instanceof String) {
+                        Reg reg = getEmptyRegister();
+                        reg = loadFromHeap((String) object);
+                        saveToHeap(ctx.ID().getText() + i, reg);
+                    }
+                    i++;
+                }
+            }
+            return;
+        }
+
         Reg reg = null;
         if (operands.get(ctx.expr()) != null) {
             reg = getEmptyRegister();
@@ -167,8 +190,26 @@ public class SprockelBuilder extends GrammarBaseListener {
         } else if (variables.get(ctx.expr()) != null) {
             reg = loadFromHeap(variables.get(ctx.expr()));
         }
+
+
         saveToHeap(ctx.ID().getText(), reg);
         super.exitDeclAssignStat(ctx);
+    }
+
+    @Override
+    public void exitArrayAssignExpr(@NotNull GrammarParser.ArrayAssignExprContext ctx) {
+        List<Object> objects = new ArrayList<>();
+        for (int i = 0; i < ctx.expr().size(); i++) {
+            if (operands.get(ctx.expr(i)) != null) {
+                objects.add(operands.get(ctx.expr(i)));
+            } else if (resultRegisters.get(ctx.expr(i)) != null) {
+                objects.add(resultRegisters.get(ctx.expr(i)));
+            } else if (variables.get(ctx.expr(i)) != null) {
+                objects.add(variables.get(ctx.expr(i)));
+            }
+        }
+        arrayAssign.put(ctx, objects);
+        super.exitArrayAssignExpr(ctx);
     }
 
     @Override
@@ -188,6 +229,37 @@ public class SprockelBuilder extends GrammarBaseListener {
 
     @Override
     public void exitArrayAssignStat(@NotNull GrammarParser.ArrayAssignStatContext ctx) {
+        //Load proper array value from memory
+        MemAddr startAddress = memory.get(ctx.ID().getText() + "0");
+        Reg startAddressReg = getEmptyRegister();
+        emit(OpCode.CONST, new Num(startAddress.getAddress()), startAddressReg);
+
+        Reg arrayIndex = null;
+        if (operands.get(ctx.expr(0)) != null) {
+            arrayIndex = getEmptyRegister();
+            saveToReg(operands.get(ctx.expr(0)), arrayIndex);
+        } else if (resultRegisters.get(ctx.expr(0)) != null) {
+            arrayIndex = resultRegisters.get(ctx.expr(0));
+        } else if (variables.get(ctx.expr(0)) != null) {
+            arrayIndex = loadFromHeap(variables.get(ctx.expr(0)));
+        }
+
+        emit(OpCode.COMPUTE, new Operator(Operator.OperatorType.ADD), startAddressReg, arrayIndex, arrayIndex);
+        releaseReg(startAddressReg);
+
+        Reg reg = null;
+        if (operands.get(ctx.expr(1)) != null) {
+            reg = getEmptyRegister();
+            saveToReg(operands.get(ctx.expr(1)), reg);
+        } else if (resultRegisters.get(ctx.expr(1)) != null) {
+            reg = resultRegisters.get(ctx.expr(1));
+        } else if (variables.get(ctx.expr(1)) != null) {
+            reg = loadFromHeap(variables.get(ctx.expr(1)));
+        }
+        emit(OpCode.STORE, reg, new MemAddr(arrayIndex));
+        releaseReg(reg);
+        releaseReg(arrayIndex);
+
         /*int size =
 
         Reg reg = null;
@@ -242,6 +314,40 @@ public class SprockelBuilder extends GrammarBaseListener {
 
     @Override
     public void exitArrayExpr(@NotNull GrammarParser.ArrayExprContext ctx) {
+        //Get array
+        MemAddr startAddress = memory.get(ctx.ID().getText() + "0");
+        startAddress.getAddress();
+        Reg startAddressReg = getEmptyRegister();
+        emit(OpCode.CONST, new Num(startAddress.getAddress()), startAddressReg);
+
+        /*Reg startAddressReg = null;
+        if (operands.get(ctx.expr()) != null) {
+            startAddressReg = getEmptyRegister();
+            saveToReg(operands.get(ctx.expr()), startAddressReg);
+        } else if (resultRegisters.get(ctx.expr()) != null) {
+            startAddressReg = resultRegisters.get(ctx.expr());
+        } else if (variables.get(ctx.expr()) != null) {
+            startAddressReg = loadFromHeap(variables.get(ctx.expr()));
+        }*/
+
+        Reg reg = null;
+        if (operands.get(ctx.expr()) != null) {
+            reg = getEmptyRegister();
+            saveToReg(operands.get(ctx.expr()), reg);
+        } else if (resultRegisters.get(ctx.expr()) != null) {
+            reg = resultRegisters.get(ctx.expr());
+        } else if (variables.get(ctx.expr()) != null) {
+            reg = loadFromHeap(variables.get(ctx.expr()));
+        }
+
+        emit(OpCode.COMPUTE, new Operator(Operator.OperatorType.ADD), startAddressReg, reg, reg);
+        releaseReg(startAddressReg);
+        Reg outputReg = getEmptyRegister();
+        emit(OpCode.LOAD, new MemAddr(reg), outputReg);
+        releaseReg(reg);
+        resultRegisters.put(ctx, outputReg);
+
+        //emit(OpCode.CONST, )
         super.exitArrayExpr(ctx);
     }
 
@@ -466,30 +572,23 @@ public class SprockelBuilder extends GrammarBaseListener {
         return reg;
     }
 
-    private void saveToReg(OperandArray operandArray) {
-        for (Operand operand : operandArray.getValues()) {
-            Reg reg = getEmptyRegister();
-            saveToReg(operand, reg);
-            releaseReg(reg);
-        }
-    }
-
+    /**
+     * Saves the operand to a register
+     *
+     * @param operand Operand to save
+     * @param reg     Register to save to
+     */
     private void saveToReg(Operand operand, Reg reg) {
         emit(OpCode.CONST, operand, reg);
     }
 
-    /* Methods to access the heap (memaddr starts at 0, count up. stack counts down from 127) */
-    private void saveToHeap(String name, OperandArray operandArray) {
-        int i = 0;
-        for (Operand operand : operandArray.getValues()) {
-            Reg reg = getEmptyRegister();
-            saveToReg(operand, reg);
-            //TODO Add name?
-            saveToHeap(name + i, reg);
-            i++;
-        }
-    }
-
+    /**
+     * Adds the variable name and memory address to the context tree
+     * Saves the register to an empty memory address
+     *
+     * @param name Variable name
+     * @param reg  Register to save
+     */
     private void saveToHeap(String name, Reg reg) {
         //Overwrite memory location, variable stays in memory so no need to add it again
         MemAddr addr;

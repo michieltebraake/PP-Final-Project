@@ -305,6 +305,18 @@ public class GrammarBaseListener implements GrammarListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterArrayAssignExpr(@NotNull GrammarParser.ArrayAssignExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitArrayAssignExpr(@NotNull GrammarParser.ArrayAssignExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterConstExpr(@NotNull GrammarParser.ConstExprContext ctx) { }
 	/**
 	 * {@inheritDoc}

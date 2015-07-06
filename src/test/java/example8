@@ -1,0 +1,9 @@
+integer[] array = {1, 2};
+
+integer i = 0;
+while (i < 2) {
+    integer temp = array[i];
+    array[i] = array[2 - i];
+    array[2 - 1] = temp;
+    i = i + 1;
+}

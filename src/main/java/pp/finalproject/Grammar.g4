@@ -37,7 +37,7 @@ expr: (NUM | TRUE | FALSE) #constExpr
     | expr (PLUS | MINUS) expr #plusMinusExpr
     | expr (LT | GT | LTE| | GTE | EQUAL | NOTEQUAL) expr #cmpExpr
     | LPAR expr RPAR #parExpr
-    | LCURLY NUM (COMMA NUM)* RCURLY #arrayExpr
+    | LCURLY expr (COMMA expr)* RCURLY #arrayAssignExpr
     | expr OR expr  #orExpr
     | expr AND expr #andExpr
     | ID LSQ expr RSQ #arrayExpr
