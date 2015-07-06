@@ -66,6 +66,7 @@ public class LexerTest {
     Shows rejected operator combinations by either tokenizing as 2 different tokens, or flat out rejecting it.
     Shows that combined operators have higher precedence than singles
      */
+    @Test
     public void testComparatorsAndOperators() {
         lt.wrong("|&");
         lt.wrong("&|");
@@ -75,7 +76,7 @@ public class LexerTest {
         lt.yields("=<", ASSIGN, LT);
 
         lt.yields("== < <= > >= = || && ; (", EQUAL, LT, LTE, GT, GTE, ASSIGN, OR, AND, SEMI, LPAR);
-        lt.yields(") { } [ ] + - * / % ,", RPAR, LCURLY, RCURLY, LSQ, RSQ, PLUS, MINUS, TIMES, DIVIDE, COMMA);
+        lt.yields(") { } [ ] + - * / ,", RPAR, LCURLY, RCURLY, LSQ, RSQ, PLUS, MINUS, TIMES, DIVIDE, COMMA);
         lt.yields("");
     }
 
@@ -84,6 +85,7 @@ public class LexerTest {
     shows that Ids cannot start with a digit, as it will tokenize as NUM, ID.
     shows that the literal values of booleans must be lowercase, otherwise they are recognized as IDs.
      */
+    @Test
     public void testIDsAndValues() {
         //shows that 1id tokenizes as NUM, ID. This will not be accepted by the parser.
         lt.yields("1id id id1 i1d", NUM, ID, ID, ID, ID);

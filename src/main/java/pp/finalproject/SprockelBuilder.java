@@ -56,6 +56,10 @@ public class SprockelBuilder extends GrammarBaseListener {
         builder.build(file);
     }
 
+    /**
+     * Compiles a sprockell program from input code and saves it as a haskell file.
+     * @param file Input source code
+     */
     public void build(File file) {
         try {
             CharStream chars = new ANTLRInputStream(new FileReader(file));
@@ -103,7 +107,7 @@ public class SprockelBuilder extends GrammarBaseListener {
 
     @Override
     public void exitProgram(@NotNull GrammarParser.ProgramContext ctx) {
-        //TODO Enable following line
+        //Enable following line if debug output is not used
         //emit(OpCode.ENDPROG);
         super.exitProgram(ctx);
     }
@@ -124,12 +128,11 @@ public class SprockelBuilder extends GrammarBaseListener {
 
             saveToReg(operand, reg);
 
-            saveToHeap(ctx.ID().getText(), reg, ctx.SHARED() != null);
+            saveToMemory(ctx.ID().getText(), reg, ctx.SHARED() != null);
         } else {
             GrammarParser.TypeContext arrayType = ctx.target().arraytype().type();
             GrammarParser.ExprContext expr = ctx.target().arraytype().expr();
 
-            //TODO Create generic loadFromExpr method (takes an expr, returns a reg?)
             int arraySize = 16;
             if (ctx.target().arraytype().expr() != null) {
                 if (operands.get(expr) != null) {
@@ -144,7 +147,7 @@ public class SprockelBuilder extends GrammarBaseListener {
                 } else {
                     saveToReg(new Num(), tempReg);
                 }
-                saveToHeap(ctx.ID().getText() + i, tempReg, ctx.SHARED() != null);
+                saveToMemory(ctx.ID().getText() + i, tempReg, ctx.SHARED() != null);
             }
         }
 
@@ -160,16 +163,14 @@ public class SprockelBuilder extends GrammarBaseListener {
                 int i = 0;
                 for (Object object : arrayContents) {
                     if (object instanceof Reg) {
-                        saveToHeap(ctx.ID().getText() + i, (Reg) object, ctx.SHARED() != null);
+                        saveToMemory(ctx.ID().getText() + i, (Reg) object, ctx.SHARED() != null);
                     } else if (object instanceof Operand) {
                         Reg reg = getEmptyRegister();
                         saveToReg((Operand) object, reg);
-                        saveToHeap(ctx.ID().getText() + i, reg, ctx.SHARED() != null);
+                        saveToMemory(ctx.ID().getText() + i, reg, ctx.SHARED() != null);
                     } else if (object instanceof String) {
-                        //TODO Something is wrong here... (getEmptyRegister() not needed, plus what is even loaded here?)
-                        Reg reg = getEmptyRegister();
-                        reg = loadFromHeap((String) object, ctx.SHARED() != null);
-                        saveToHeap(ctx.ID().getText() + i, reg, ctx.SHARED() != null);
+                        Reg reg = loadFromMemory((String) object, ctx.SHARED() != null);
+                        saveToMemory(ctx.ID().getText() + i, reg, ctx.SHARED() != null);
                     }
                     i++;
                 }
@@ -184,12 +185,11 @@ public class SprockelBuilder extends GrammarBaseListener {
         } else if (resultRegisters.get(ctx.expr()) != null) {
             reg = resultRegisters.get(ctx.expr());
         } else if (variables.get(ctx.expr()) != null) {
-            //TODO Same here, what's the point of loading this? You override it anyway?
-            reg = loadFromHeap(variables.get(ctx.expr()), ctx.SHARED() != null);
+            reg = loadFromMemory(variables.get(ctx.expr()), ctx.SHARED() != null);
         }
 
 
-        saveToHeap(ctx.ID().getText(), reg, ctx.SHARED() != null);
+        saveToMemory(ctx.ID().getText(), reg, ctx.SHARED() != null);
         super.exitDeclAssignStat(ctx);
     }
 
@@ -219,9 +219,9 @@ public class SprockelBuilder extends GrammarBaseListener {
         } else if (resultRegisters.get(ctx.expr()) != null) {
             reg = resultRegisters.get(ctx.expr());
         } else if (variables.get(ctx.expr()) != null) {
-            reg = loadFromHeap(variables.get(ctx.expr()), shared);
+            reg = loadFromMemory(variables.get(ctx.expr()), shared);
         }
-        saveToHeap(ctx.ID().getText(), reg, shared);
+        saveToMemory(ctx.ID().getText(), reg, shared);
         super.exitAssignStat(ctx);
     }
 
@@ -231,7 +231,6 @@ public class SprockelBuilder extends GrammarBaseListener {
         boolean shared = sharedMemory.containsKey(id);
 
         //Load proper array value from memory
-        //TODO Make this better (other array handling methods might also need this modification)'
         Reg startAddressReg = getEmptyRegister();
         if (shared) {
             MemAddr startAddress = sharedMemory.get(id);
@@ -248,8 +247,7 @@ public class SprockelBuilder extends GrammarBaseListener {
         } else if (resultRegisters.get(ctx.expr(0)) != null) {
             arrayIndex = resultRegisters.get(ctx.expr(0));
         } else if (variables.get(ctx.expr(0)) != null) {
-            //TODO Is this right?
-            arrayIndex = loadFromHeap(variables.get(ctx.expr(0)), sharedMemory.containsKey(variables.get(ctx.expr(0))));
+            arrayIndex = loadFromMemory(variables.get(ctx.expr(0)), sharedMemory.containsKey(variables.get(ctx.expr(0))));
         }
 
         emit(OpCode.COMPUTE, new Operator(Operator.OperatorType.ADD), startAddressReg, arrayIndex, arrayIndex);
@@ -262,24 +260,12 @@ public class SprockelBuilder extends GrammarBaseListener {
         } else if (resultRegisters.get(ctx.expr(1)) != null) {
             reg = resultRegisters.get(ctx.expr(1));
         } else if (variables.get(ctx.expr(1)) != null) {
-            reg = loadFromHeap(variables.get(ctx.expr(1)), shared);
+            reg = loadFromMemory(variables.get(ctx.expr(1)), shared);
         }
 
-        saveToHeap(id, reg, shared);
+        saveToMemory(id, reg, shared);
         releaseReg(reg);
         releaseReg(arrayIndex);
-
-        /*int size =
-
-        Reg reg = null;
-        if (operands.get(ctx.expr(0)) != null) {
-            reg = getEmptyRegister();
-            saveToReg(operands.get(ctx.expr(0)), reg);
-        } else if (resultRegisters.get(ctx.expr(0)) != null) {
-            reg = resultRegisters.get(ctx.expr(0));
-        } else if (variables.get(ctx.expr(0)) != null) {
-            reg = loadFromHeap(variables.get(ctx.expr(0)));
-        }*/
 
         super.exitArrayAssignStat(ctx);
     }
@@ -311,7 +297,7 @@ public class SprockelBuilder extends GrammarBaseListener {
         String id = ctx.ID().getText() + "0";
         boolean shared = sharedMemory.containsKey(id);
 
-        //Reg startAddress = loadFromHeap(id, shared);
+        //Reg startAddress = loadFromMemory(id, shared);
         Reg startAddressReg = getEmptyRegister();
         if (shared) {
             MemAddr startAddress = sharedMemory.get(id);
@@ -328,12 +314,12 @@ public class SprockelBuilder extends GrammarBaseListener {
         } else if (resultRegisters.get(ctx.expr()) != null) {
             reg = resultRegisters.get(ctx.expr());
         } else if (variables.get(ctx.expr()) != null) {
-            reg = loadFromHeap(variables.get(ctx.expr()), shared);
+            reg = loadFromMemory(variables.get(ctx.expr()), shared);
         }
 
         emit(OpCode.COMPUTE, new Operator(Operator.OperatorType.ADD), startAddressReg, reg, reg);
         releaseReg(startAddressReg);
-        Reg outputReg = loadFromHeap(id, shared);
+        Reg outputReg = loadFromMemory(id, shared);
         releaseReg(reg);
         resultRegisters.put(ctx, outputReg);
 
@@ -353,7 +339,7 @@ public class SprockelBuilder extends GrammarBaseListener {
             reg = resultRegisters.get(ctx.expr());
         } else if (variables.get(ctx.expr()) != null) {
             boolean shared = sharedMemory.containsKey(variables.get(ctx.expr()));
-            reg = loadFromHeap(variables.get(ctx.expr()), shared);
+            reg = loadFromMemory(variables.get(ctx.expr()), shared);
         }
         emit(OpCode.BRANCH, reg, new Target(Target.TargetType.REL, 2));
         releaseReg(reg);
@@ -391,7 +377,7 @@ public class SprockelBuilder extends GrammarBaseListener {
             reg = resultRegisters.get(ctx.expr());
         } else if (variables.get(ctx.expr()) != null) {
             boolean shared = sharedMemory.containsKey(variables.get(ctx.expr()));
-            reg = loadFromHeap(variables.get(ctx.expr()), shared);
+            reg = loadFromMemory(variables.get(ctx.expr()), shared);
         }
         emit(OpCode.BRANCH, reg, new Target(Target.TargetType.REL, 2));
         releaseReg(reg);
@@ -451,8 +437,8 @@ public class SprockelBuilder extends GrammarBaseListener {
     /* Expressions */
     @Override
     public void exitTimesDivideExpr(@NotNull GrammarParser.TimesDivideExprContext ctx) {
-        Reg reg1 = popOrGetOperator(ctx.expr(0));
-        Reg reg2 = popOrGetOperator(ctx.expr(1));
+        Reg reg1 = loadToReg(ctx.expr(0));
+        Reg reg2 = loadToReg(ctx.expr(1));
         if (ctx.TIMES() != null) {
             emit(OpCode.COMPUTE, new Operator(Operator.OperatorType.MUL), reg1, reg2, reg1);
         } else if (ctx.DIVIDE() != null) {
@@ -465,8 +451,8 @@ public class SprockelBuilder extends GrammarBaseListener {
 
     @Override
     public void exitPlusMinusExpr(@NotNull GrammarParser.PlusMinusExprContext ctx) {
-        Reg reg1 = popOrGetOperator(ctx.expr(0));
-        Reg reg2 = popOrGetOperator(ctx.expr(1));
+        Reg reg1 = loadToReg(ctx.expr(0));
+        Reg reg2 = loadToReg(ctx.expr(1));
 
         if (ctx.PLUS() != null) {
             emit(OpCode.COMPUTE, new Operator(Operator.OperatorType.ADD), reg1, reg2, reg1);
@@ -480,8 +466,8 @@ public class SprockelBuilder extends GrammarBaseListener {
 
     @Override
     public void exitOrExpr(@NotNull GrammarParser.OrExprContext ctx) {
-        Reg reg1 = popOrGetOperator(ctx.expr(0));
-        Reg reg2 = popOrGetOperator(ctx.expr(1));
+        Reg reg1 = loadToReg(ctx.expr(0));
+        Reg reg2 = loadToReg(ctx.expr(1));
         emit(OpCode.COMPUTE, new Operator(Operator.OperatorType.OR), reg1, reg2, reg1);
         resultRegisters.put(ctx, reg1);
         releaseReg(reg2);
@@ -490,7 +476,7 @@ public class SprockelBuilder extends GrammarBaseListener {
 
     @Override
     public void exitMinusExpr(@NotNull GrammarParser.MinusExprContext ctx) {
-        Reg reg1 = popOrGetOperator(ctx.expr());
+        Reg reg1 = loadToReg(ctx.expr());
         emit(OpCode.COMPUTE, new Operator(Operator.OperatorType.SUB), new Reg("Zero"), reg1, reg1);
         resultRegisters.put(ctx, reg1);
         super.exitMinusExpr(ctx);
@@ -524,8 +510,8 @@ public class SprockelBuilder extends GrammarBaseListener {
     @Override
     public void exitCmpExpr(@NotNull GrammarParser.CmpExprContext ctx) {
         //LT | GT | LTE| | GTE | EQUAL | NOTEQUAL
-        Reg reg1 = popOrGetOperator(ctx.expr(0));
-        Reg reg2 = popOrGetOperator(ctx.expr(1));
+        Reg reg1 = loadToReg(ctx.expr(0));
+        Reg reg2 = loadToReg(ctx.expr(1));
         if (ctx.LT() != null) {
             emit(OpCode.COMPUTE, new Operator(Operator.OperatorType.LT), reg1, reg2, reg1);
         } else if (ctx.GT() != null) {
@@ -550,8 +536,8 @@ public class SprockelBuilder extends GrammarBaseListener {
 
     @Override
     public void exitAndExpr(@NotNull GrammarParser.AndExprContext ctx) {
-        Reg reg1 = popOrGetOperator(ctx.expr(0));
-        Reg reg2 = popOrGetOperator(ctx.expr(1));
+        Reg reg1 = loadToReg(ctx.expr(0));
+        Reg reg2 = loadToReg(ctx.expr(1));
         emit(OpCode.COMPUTE, new Operator(Operator.OperatorType.AND), reg1, reg2, reg1);
         resultRegisters.put(ctx, reg1);
         releaseReg(reg2);
@@ -563,29 +549,27 @@ public class SprockelBuilder extends GrammarBaseListener {
         super.exitType(ctx);
     }
 
-    //Because the heap is easier to access, we use to this for longer variable declarations
-    //The stack is used to store temporary variables
-    //Example stack value: if (i > 3 && i < 6). Results from i > 3 and i < 6 are saved to the stack.
-    //in the same example i is saved to the heap
-    //and the 3 and 6 are only put into a register temporarily
-
-    /* Methods to access the stack */
-    //TODO Very misleading name, this is going to be an all-purpose access method for operands, the stack and the heap
-    private Reg popOrGetOperator(GrammarParser.ExprContext expr) {
+    /**
+     * Loads a value from given ExprContext into a register.
+     * This value can be obtained from several places via the symbol table.
+     *
+     * @param expr context to load from
+     * @return register with value from expression
+     */
+    private Reg loadToReg(GrammarParser.ExprContext expr) {
         if (resultRegisters.get(expr) != null) {
             return resultRegisters.get(expr);
         }
-        //If it is a named variable, load value from heap
+        //If it is a named variable, load value from memory
         if (expr instanceof GrammarParser.IdExprContext) {
             GrammarParser.IdExprContext ctx = (GrammarParser.IdExprContext) expr;
-            Reg reg = loadFromHeap(ctx.ID().getText(), sharedMemory.containsKey(((GrammarParser.IdExprContext) expr).ID().getText()));
+            Reg reg = loadFromMemory(ctx.ID().getText(), sharedMemory.containsKey(((GrammarParser.IdExprContext) expr).ID().getText()));
             return reg;
         } else if (operands.get(expr) != null) {
             //Create a register to return value in
             Reg reg = getEmptyRegister();
             saveToReg(operands.get(expr), reg);
             return reg;
-            //TODO Should this be here like this? if yes, move all calls to that method to this method.
         } else {
             //Create a register to return value in
             Reg reg = getEmptyRegister();
@@ -611,7 +595,7 @@ public class SprockelBuilder extends GrammarBaseListener {
      * @param name Variable name
      * @param reg  Register to save
      */
-    private void saveToHeap(String name, Reg reg, boolean shared) {
+    private void saveToMemory(String name, Reg reg, boolean shared) {
         if (shared) {
             MemAddr addr;
             if (sharedMemory.containsKey(name)) {
@@ -620,19 +604,18 @@ public class SprockelBuilder extends GrammarBaseListener {
             } else {
                 addr = new MemAddr(sharedMemory.size() + 1);
                 sharedMemory.put(name, addr);
+                //Branch to declare if it is sprockel id 0
+                //Wait until until it is defined otherwise
                 emit(OpCode.BRANCH, new Reg("SPID"), new Target(Target.TargetType.REL, 3));
                 emit(OpCode.WRITE, reg, addr);
                 emit(OpCode.JUMP, new Target(Target.TargetType.REL, 3));
                 emit(OpCode.READ, addr);
                 emit(OpCode.RECEIVE, reg);
             }
-
-            //Branch to declare if it is sprockel id 0
-            //Wait until until it is defined otherwise
         } else {
-            //Overwrite memory location, variable stays in memory so no need to add it again
             MemAddr addr;
             if (memory.containsKey(name)) {
+                //Overwrite memory location, variable stays in memory so no need to add it again
                 addr = memory.get(name);
             } else {
                 addr = new MemAddr(memory.size());
@@ -643,7 +626,14 @@ public class SprockelBuilder extends GrammarBaseListener {
         releaseReg(reg);
     }
 
-    private Reg loadFromHeap(String name, boolean shared) {
+    /**
+     * Loads a variable from memory.
+     *
+     * @param name Variable name
+     * @param shared Load from shared memory or not
+     * @return Reg with variable value
+     */
+    private Reg loadFromMemory(String name, boolean shared) {
         if (shared) {
             MemAddr addr = sharedMemory.get(name);
             Reg reg = getEmptyRegister();
@@ -677,6 +667,11 @@ public class SprockelBuilder extends GrammarBaseListener {
         return new Reg("Invalidreg" + registersInUse.size());
     }
 
+    /**
+     * Releases a reg so it can be used again.
+     *
+     * @param reg Reg to release
+     */
     private void releaseReg(Reg reg) {
         registersInUse.remove((Integer) reg.getId());
     }
