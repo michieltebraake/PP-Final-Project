@@ -10,11 +10,12 @@ import pp.finalproject.model.Operand;
 import pp.finalproject.model.Operator;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class TypeChecker extends GrammarBaseListener {
     private ParseTreeProperty<Operand.Type> operands = new ParseTreeProperty<>();
-    private ParseTreeProperty<String> variables = new ParseTreeProperty<>();
+    private HashMap<String, ParseTree> variables = new HashMap<>();
 
     private List<Exception> errors = new ArrayList<>();
 
@@ -35,16 +36,52 @@ public class TypeChecker extends GrammarBaseListener {
 
     @Override
     public void exitDeclAssignStat(@NotNull GrammarParser.DeclAssignStatContext ctx) {
+        GrammarParser.TypeContext type;
+        if (ctx.target().arraytype() != null) {
+            type = ctx.target().arraytype().type();
+        } else {
+            type = ctx.target().type();
+        }
+        if (type.INT() != null) {
+            operands.put(ctx.ID(), Operand.Type.NUM);
+        } else if (type.BOOL() != null) {
+            operands.put(ctx.ID(), Operand.Type.BOOL);
+        }
+
+        Operand.Type assignOperand = operands.get(ctx.expr());
+        if (operands.get(ctx.ID()) != assignOperand) {
+            errors.add(new TypeException(ctx, operands.get(ctx.ID()), assignOperand));
+        }
+
+        variables.put(ctx.ID().getText(), ctx.ID());
         super.exitDeclAssignStat(ctx);
     }
 
     @Override
     public void exitDeclStat(@NotNull GrammarParser.DeclStatContext ctx) {
+        GrammarParser.TypeContext type;
+        if (ctx.target().arraytype() != null) {
+            type = ctx.target().arraytype().type();
+        } else {
+            type = ctx.target().type();
+        }
+        if (type.INT() != null) {
+            operands.put(ctx.ID(), Operand.Type.NUM);
+        } else if (type.BOOL() != null) {
+            operands.put(ctx.ID(), Operand.Type.BOOL);
+        }
+
+        variables.put(ctx.ID().getText(), ctx.ID());
         super.exitDeclStat(ctx);
     }
 
     @Override
     public void exitAssignStat(@NotNull GrammarParser.AssignStatContext ctx) {
+        Operand.Type assignOperand = operands.get(ctx.expr());
+        Operand.Type variableOperand = operands.get(variables.get(ctx.ID().getText()));
+        if (variableOperand != assignOperand) {
+            errors.add(new TypeException(ctx, variableOperand, assignOperand));
+        }
         super.exitAssignStat(ctx);
     }
 
@@ -70,6 +107,8 @@ public class TypeChecker extends GrammarBaseListener {
 
     @Override
     public void exitArrayAssignStat(@NotNull GrammarParser.ArrayAssignStatContext ctx) {
+        Operand.Type operand = operands.get(variables.get(ctx.ID().getText()));
+
         super.exitArrayAssignStat(ctx);
     }
 
@@ -125,6 +164,11 @@ public class TypeChecker extends GrammarBaseListener {
 
     @Override
     public void exitArrayExpr(@NotNull GrammarParser.ArrayExprContext ctx) {
+        if (operands.get(ctx.expr()) != Operand.Type.NUM) {
+            errors.add(new TypeException(ctx, Operand.Type.NUM, operands.get(ctx.expr())));
+        }
+        Operand.Type operand = operands.get(variables.get(ctx.ID().getText()));
+        operands.put(ctx, operand);
         super.exitArrayExpr(ctx);
     }
 
@@ -180,6 +224,17 @@ public class TypeChecker extends GrammarBaseListener {
 
     @Override
     public void exitArrayAssignExpr(@NotNull GrammarParser.ArrayAssignExprContext ctx) {
+        Operand.Type operand = null;
+        for (GrammarParser.ExprContext expr : ctx.expr()) {
+            if (operand == null) {
+                operand = operands.get(expr);
+            } else {
+                if (operands.get(expr) != operand) {
+                    errors.add(new TypeException(ctx, operand, operands.get(expr)));
+                }
+            }
+        }
+        operands.put(ctx, operand);
         super.exitArrayAssignExpr(ctx);
     }
 
@@ -195,6 +250,7 @@ public class TypeChecker extends GrammarBaseListener {
 
     @Override
     public void exitIdExpr(@NotNull GrammarParser.IdExprContext ctx) {
+        operands.put(ctx, operands.get(variables.get(ctx.ID().getText())));
         super.exitIdExpr(ctx);
     }
 
