@@ -160,7 +160,7 @@ public class SprockelBuilder extends GrammarBaseListener {
                 }
             }
 
-            for (int i = 0; i <= arraySize; i++) {
+            for (int i = 0; i < arraySize; i++) {
                 Reg tempReg = getEmptyRegister();
                 if (arrayType.BOOL() != null) {
                     saveToReg(new Bool(), tempReg);
@@ -254,7 +254,6 @@ public class SprockelBuilder extends GrammarBaseListener {
         boolean shared = sharedMemory.containsKey(id);
 
         //Load proper array value from memory
-        //Reg startAddressReg = loadFromHeap(ctx.ID().getText() + "0", shared);
         //TODO Make this better (other array handling methods might also need this modification)'
         Reg startAddressReg = getEmptyRegister();
         if (shared) {
@@ -635,23 +634,6 @@ public class SprockelBuilder extends GrammarBaseListener {
         }
     }
 
-    //TODO Why is this method never used?
-    private void pushToStack(Reg reg) {
-        emit(OpCode.PUSH, reg);
-        releaseReg(reg);
-    }
-
-    private Reg loadOperandOrVariable(GrammarParser.ExprContext expr, Reg reg) {
-        if (variables.get(expr) != null) {
-            loadFromMemory(variables.get(expr), reg);
-        } else if (operands.get(expr) != null) {
-            saveToReg(operands.get(expr), reg);
-        } else if (resultRegisters.get(expr) != null) {
-            return resultRegisters.get(expr);
-        }
-        return reg;
-    }
-
     /**
      * Saves the operand to a register
      *
@@ -713,19 +695,6 @@ public class SprockelBuilder extends GrammarBaseListener {
             Reg reg = getEmptyRegister();
             emit(OpCode.LOAD, addr, reg);
             return reg;
-        }
-    }
-
-    /* Other (potentially outdated) methods */
-    private void loadFromMemory(String variable, Reg reg) {
-        int index = variablesInMemory.indexOf(variable);
-        if (index != 0) {
-            Reg tempReg = getEmptyRegister();
-            emit(OpCode.CONST, new Num(index), tempReg);
-            emit(OpCode.COMPUTE, new Operator(Operator.OperatorType.ADD), new Reg("SP"), tempReg, tempReg);
-            emit(OpCode.LOAD, new MemAddr(tempReg), reg);
-        } else {
-            emit(OpCode.LOAD, new MemAddr(new Reg("SP")), reg);
         }
     }
 
