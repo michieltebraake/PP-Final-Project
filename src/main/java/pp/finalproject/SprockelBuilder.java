@@ -477,11 +477,8 @@ public class SprockelBuilder extends GrammarBaseListener {
     @Override
     public void exitMinusExpr(@NotNull GrammarParser.MinusExprContext ctx) {
         Reg reg1 = popOrGetOperator(ctx.expr());
-        Reg reg2 = getEmptyRegister();
-        saveToReg(new Num(0), reg2);
-        emit(OpCode.COMPUTE, new Operator(Operator.OperatorType.SUB), reg2, reg1, reg1);
+        emit(OpCode.COMPUTE, new Operator(Operator.OperatorType.SUB), new Reg("Zero"), reg1, reg1);
         resultRegisters.put(ctx, reg1);
-        releaseReg(reg2);
         super.exitMinusExpr(ctx);
     }
 
