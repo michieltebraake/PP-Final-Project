@@ -100,7 +100,7 @@ public class SprockelBuilder extends GrammarBaseListener {
                 for (Exception error : typeChecker.getErrors()) {
                     System.out.println(error);
                 }
-                //return;
+                return;
             }
 
             ParseTreeWalker walker = new ParseTreeWalker();
@@ -250,10 +250,20 @@ public class SprockelBuilder extends GrammarBaseListener {
 
     @Override
     public void exitArrayAssignStat(@NotNull GrammarParser.ArrayAssignStatContext ctx) {
-        boolean shared = sharedMemory.containsKey(ctx.ID().getText() + "0");
+        String id = ctx.ID().getText() + "0";
+        boolean shared = sharedMemory.containsKey(id);
 
         //Load proper array value from memory
-        Reg startAddressReg = loadFromHeap(ctx.ID().getText() + "0", shared);
+        //Reg startAddressReg = loadFromHeap(ctx.ID().getText() + "0", shared);
+        //TODO Make this better (other array handling methods might also need this modification)'
+        Reg startAddressReg = getEmptyRegister();
+        if (shared) {
+            MemAddr startAddress = sharedMemory.get(id);
+            saveToReg(new Num(startAddress.getAddress()), startAddressReg);
+        } else {
+            MemAddr startAddress = memory.get(id);
+            saveToReg(new Num(startAddress.getAddress()), startAddressReg);
+        }
 
         Reg arrayIndex = null;
         if (operands.get(ctx.expr(0)) != null) {
@@ -262,6 +272,7 @@ public class SprockelBuilder extends GrammarBaseListener {
         } else if (resultRegisters.get(ctx.expr(0)) != null) {
             arrayIndex = resultRegisters.get(ctx.expr(0));
         } else if (variables.get(ctx.expr(0)) != null) {
+            //TODO Is this right?
             arrayIndex = loadFromHeap(variables.get(ctx.expr(0)), sharedMemory.containsKey(variables.get(ctx.expr(0))));
         }
 
@@ -277,7 +288,8 @@ public class SprockelBuilder extends GrammarBaseListener {
         } else if (variables.get(ctx.expr(1)) != null) {
             reg = loadFromHeap(variables.get(ctx.expr(1)), shared);
         }
-        emit(OpCode.STORE, reg, new MemAddr(arrayIndex));
+
+        saveToHeap(id, reg, shared);
         releaseReg(reg);
         releaseReg(arrayIndex);
 
@@ -335,9 +347,18 @@ public class SprockelBuilder extends GrammarBaseListener {
 
     @Override
     public void exitArrayExpr(@NotNull GrammarParser.ArrayExprContext ctx) {
-        boolean shared = sharedMemory.containsKey(ctx.ID().getText() + "0");
+        String id = ctx.ID().getText() + "0";
+        boolean shared = sharedMemory.containsKey(id);
 
-        Reg startAddress = loadFromHeap(ctx.ID().getText() + "0", shared);
+        //Reg startAddress = loadFromHeap(id, shared);
+        Reg startAddressReg = getEmptyRegister();
+        if (shared) {
+            MemAddr startAddress = sharedMemory.get(id);
+            saveToReg(new Num(startAddress.getAddress()), startAddressReg);
+        } else {
+            MemAddr startAddress = memory.get(id);
+            saveToReg(new Num(startAddress.getAddress()), startAddressReg);
+        }
 
         Reg reg = null;
         if (operands.get(ctx.expr()) != null) {
@@ -349,10 +370,9 @@ public class SprockelBuilder extends GrammarBaseListener {
             reg = loadFromHeap(variables.get(ctx.expr()), shared);
         }
 
-        emit(OpCode.COMPUTE, new Operator(Operator.OperatorType.ADD), startAddress, reg, reg);
-        releaseReg(startAddress);
-        Reg outputReg = getEmptyRegister();
-        emit(OpCode.LOAD, new MemAddr(reg), outputReg);
+        emit(OpCode.COMPUTE, new Operator(Operator.OperatorType.ADD), startAddressReg, reg, reg);
+        releaseReg(startAddressReg);
+        Reg outputReg = loadFromHeap(id, shared);
         releaseReg(reg);
         resultRegisters.put(ctx, outputReg);
 
@@ -446,6 +466,8 @@ public class SprockelBuilder extends GrammarBaseListener {
         emit(OpCode.JUMP, new Target(Target.TargetType.REL, -(loopLines)));
         super.exitWhileStat(ctx);
     }
+
+    //TODO array[2] creates a 3 element array?
 
     /* Concurreny */
     @Override

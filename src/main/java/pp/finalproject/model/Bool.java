@@ -4,7 +4,7 @@ public class Bool extends Operand {
     private final boolean value;
 
     public Bool() {
-        this(true);
+        this(false);
     }
 
     public Bool(boolean value) {

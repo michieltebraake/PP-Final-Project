@@ -1,18 +1,21 @@
 integer mypid = spid;
-shared boolean[2] flag;
+shared boolean flag = {false, false};
 shared integer turn;
-integer a = 0;
+shared integer result;
+integer i;
 
-while(true){
+while(i < 10){
     synchronized{
-        flag[mypid] = 1;
+        flag[mypid] = true;
         turn = 1-mypid;
     }
     while (flag[1-mypid] && turn == 1 - mypid){}
-
-    a = 999;
-
+	
+    result = result + 1;
+	
     synchronized{
-        flag[mypid] = 0;
+        flag[mypid] = false;
     }
+	
+	i = i + 1;
 }
