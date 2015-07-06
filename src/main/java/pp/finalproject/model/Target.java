@@ -8,7 +8,6 @@ public class Target extends Operand {
         super(Type.TARGET);
         this.targetType = targetType;
         this.value = value;
-        //TODO Deze mist de optie Ind Reg en Rel Int, deze moeten nog toegevoegd worden (zie MemAddr, pittig lelijk)
     }
 
     public int getValue() {
@@ -33,9 +32,12 @@ public class Target extends Operand {
 
     @Override
     public String toString() {
-        if (targetType == TargetType.REL)
+        if (targetType == TargetType.REL) {
             return "(Rel (" + value + "))";
-        //TODO This isn't finished
-        return "" + value;
+        } else if (targetType == TargetType.ABS) {
+            return "(Abs ("  + value + "))";
+        } else {
+            return "(Ind (" + value + "))";
+        }
     }
 }

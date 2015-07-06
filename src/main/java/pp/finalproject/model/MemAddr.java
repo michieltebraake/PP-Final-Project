@@ -8,7 +8,6 @@ public class MemAddr extends Operand {
         super(Type.MEMADDR);
         this.address = address;
         this.reg = null;
-        //TODO Dit is pittig lelijk
     }
 
     public MemAddr(Reg reg) {

@@ -1,2 +1,4 @@
-boolean a = true;
-boolean b = true && a;
+if (4 > 3) {
+    integer a = 1;
+    integer a = 3 + true;
+}

@@ -29,18 +29,13 @@ public class Operator extends Operand {
         SUB("Sub"),
         MUL("Mul"),
         DIV("Div"),
-        MOD("Mod"),
         EQUAL("Equal"),
-        NEQ("NEq"),
         GT("Gt"),
         GTE("GtE"),
         LT("Lt"),
         LTE("LtE"),
         AND("And"),
-        OR("Or"),
-        XOR("Xor"),
-        LSHIFT("LShift"),
-        RSHIFT("RShift");
+        OR("Or");
 
         private String alias;
 

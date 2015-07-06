@@ -16,41 +16,27 @@ import java.util.HashMap;
 import java.util.List;
 
 public class SprockelBuilder extends GrammarBaseListener {
-    //private ParseTreeProperty<String> lines = new ParseTreeProperty<>();
-    //private ParseTreeProperty<Integer> numbers = new ParseTreeProperty<>();
-    //private ParseTreeProperty<Boolean> booleans = new ParseTreeProperty<>();
-
     private ParseTreeProperty<Operand> operands = new ParseTreeProperty<>();
-
-    //Use variable names to find the register associated with it?
     private ParseTreeProperty<String> variables = new ParseTreeProperty<>();
-
     private ParseTreeProperty<Reg> resultRegisters = new ParseTreeProperty<>();
 
+    //Saves a list of of objects to be assigned to an array (integer[] test = {1, 2, 3})
     private ParseTreeProperty<List<Object>> arrayAssign = new ParseTreeProperty<>();
 
     //Save current number of program lines at a node, needed to loop back in a while
     private ParseTreeProperty<Integer> programLines = new ParseTreeProperty<>();
 
-    private HashMap<String, MemAddr> sharedMemory = new HashMap<>();
-    private HashMap<String, MemAddr> memory = new HashMap<>();
-
     //Saves the location of branch & jump instructions needed for if statements. The values for this need to be filled in after the if statement
     private ParseTreeProperty<Op> operators = new ParseTreeProperty<>();
 
-    //private ParseTreeProperty<>
-
-    //HashMap of variable names and registers (cleared after every stat)
-    private HashMap<String, String> registers = new HashMap<>();
-
-    private List<String> variablesInMemory = new ArrayList<>();
+    private HashMap<String, MemAddr> sharedMemory = new HashMap<>();
+    private HashMap<String, MemAddr> memory = new HashMap<>();
 
     private Program program = new Program();
 
     private List<Integer> registersInUse = new ArrayList<>();
 
     public SprockelBuilder() {
-
     }
 
     /**
@@ -80,15 +66,6 @@ public class SprockelBuilder extends GrammarBaseListener {
 
             GrammarParser parser = new GrammarParser(tokens);
             ParseTree tree = parser.program();
-            parser.removeErrorListeners();
-            //TODO This error listener doesn't really work well, fix it?
-            //TODO Add errors to an array and make it possible to return that for automated testing?
-            parser.addErrorListener(new BaseErrorListener() {
-                @Override
-                public void syntaxError(Recognizer<?, ?> recognizer, Object o, int i, int i1, String s, RecognitionException e) {
-                    System.out.println("Syntax error: " + s);
-                }
-            });
 
             if (parser.getNumberOfSyntaxErrors() != 0)
                 return;

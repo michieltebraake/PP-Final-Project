@@ -87,7 +87,6 @@ public class Util {
                 break;
         }
 
-
         program.addOp(new Op(OpCode.READ, new MemAddr(1)));
         program.addOp(new Op(OpCode.RECEIVE, new Reg("RegE")));
         program.addOp(new Op(OpCode.NOP));

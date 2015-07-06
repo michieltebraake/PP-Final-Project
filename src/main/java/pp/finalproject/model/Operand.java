@@ -14,7 +14,6 @@ public class Operand {
     public enum Type {
         REG,
         NUM,
-        STR,
         MEMADDR,
         TARGET,
         OPERATOR,
