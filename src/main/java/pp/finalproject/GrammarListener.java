@@ -1,4 +1,4 @@
-// Generated from E:/michiel/Documents/GitHub/PP-Final-Project/src/main/java/pp/finalproject\Grammar.g4 by ANTLR 4.5
+// Generated from D:/GitHub/PP-Final-Project/src/main/java/pp/finalproject\Grammar.g4 by ANTLR 4.5
 package pp.finalproject;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
@@ -102,6 +102,18 @@ public interface GrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitArrayAssignStat(@NotNull GrammarParser.ArrayAssignStatContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code outStat}
+	 * labeled alternative in {@link GrammarParser#stat}.
+	 * @param ctx the parse tree
+	 */
+	void enterOutStat(@NotNull GrammarParser.OutStatContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code outStat}
+	 * labeled alternative in {@link GrammarParser#stat}.
+	 * @param ctx the parse tree
+	 */
+	void exitOutStat(@NotNull GrammarParser.OutStatContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link GrammarParser#ifcompare}.
 	 * @param ctx the parse tree

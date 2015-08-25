@@ -1,0 +1,25 @@
+integer a = 1;
+
+integer b = 6 + 2;
+integer c = 6 - 2;
+integer d = 6 * 2;
+integer e = 6 / 2;
+
+integer f = 1 + 2 * 6 / 3;
+integer g = (1 + 2) * 6 / 3;
+
+boolean h = true;
+boolean i = false;
+boolean j = true && true;
+boolean k = (1 + 2) < 4 || false;
+
+out(a);
+out(b);
+out(c);
+out(d);
+out(f);
+out(g);
+out(h);
+out(i);
+out(j);
+out(k);

@@ -1,0 +1,6 @@
+integer[] a = {0,1};
+integer[] b = {(0+1), 2};
+integer[] c = {(0+1), (2+3)};
+integer[] d = {(0+1),(2+3),(4+5),(6+7),(8+9)};
+integer[5] e;
+integer[] f;

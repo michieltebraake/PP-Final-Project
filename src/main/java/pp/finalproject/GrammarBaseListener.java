@@ -1,4 +1,4 @@
-// Generated from E:/michiel/Documents/GitHub/PP-Final-Project/src/main/java/pp/finalproject\Grammar.g4 by ANTLR 4.5
+// Generated from D:/GitHub/PP-Final-Project/src/main/java/pp/finalproject\Grammar.g4 by ANTLR 4.5
 package pp.finalproject;
 
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -108,6 +108,18 @@ public class GrammarBaseListener implements GrammarListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitArrayAssignStat(@NotNull GrammarParser.ArrayAssignStatContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterOutStat(@NotNull GrammarParser.OutStatContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitOutStat(@NotNull GrammarParser.OutStatContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

@@ -1,0 +1,11 @@
+integer[] array = {1,2,3,4,5};
+integer size = 4;
+
+integer i = 0;
+
+while (i < size) {
+	integer temp = array[i];
+	array[i] = array[size - i];
+	array[size - i] = temp;
+	i = i + 1;
+}
