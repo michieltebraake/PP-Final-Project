@@ -149,6 +149,7 @@ public class TypeChecker extends GrammarBaseListener {
 
     @Override
     public void exitParExpr(@NotNull GrammarParser.ParExprContext ctx) {
+        operands.put(ctx, operands.get(ctx.expr()));
         super.exitParExpr(ctx);
     }
 
