@@ -46,7 +46,7 @@ public class SprockelBuilder extends GrammarBaseListener {
         String filename;
         if (args.length == 0) {
             //System.err.println("Usage: [filename]+");
-            filename = "src\\test\\test-source\\succeeds\\array-access";
+            filename = "src\\test\\test-source\\programs\\array-reverse";
         } else {
             filename = args[0];
         }
@@ -263,7 +263,7 @@ public class SprockelBuilder extends GrammarBaseListener {
             reg = loadFromMemory(variables.get(ctx.expr(1)), shared);
         }
 
-        saveToMemory(id, reg, shared);
+        saveArraySlotToMemory(arrayIndex, reg, shared);
         releaseReg(reg);
         releaseReg(arrayIndex);
 
@@ -307,20 +307,21 @@ public class SprockelBuilder extends GrammarBaseListener {
             saveToReg(new Num(startAddress.getAddress()), startAddressReg);
         }
 
-        Reg reg = null;
+        Reg arrayIndex = null;
         if (operands.get(ctx.expr()) != null) {
-            reg = getEmptyRegister();
-            saveToReg(operands.get(ctx.expr()), reg);
+            arrayIndex = getEmptyRegister();
+            saveToReg(operands.get(ctx.expr()), arrayIndex);
         } else if (resultRegisters.get(ctx.expr()) != null) {
-            reg = resultRegisters.get(ctx.expr());
+            arrayIndex = resultRegisters.get(ctx.expr());
         } else if (variables.get(ctx.expr()) != null) {
-            reg = loadFromMemory(variables.get(ctx.expr()), shared);
+            arrayIndex = loadFromMemory(variables.get(ctx.expr()), shared);
         }
 
-        emit(OpCode.COMPUTE, new Operator(Operator.OperatorType.ADD), startAddressReg, reg, reg);
+        emit(OpCode.COMPUTE, new Operator(Operator.OperatorType.ADD), startAddressReg, arrayIndex, arrayIndex);
         releaseReg(startAddressReg);
-        Reg outputReg = loadFromMemory(id, shared);
-        releaseReg(reg);
+        //Reg outputReg = loadFromMemory(id, shared);
+        Reg outputReg = loadArraySlotFromMemory(arrayIndex, shared);
+        releaseReg(arrayIndex);
         resultRegisters.put(ctx, outputReg);
 
         //emit(OpCode.CONST, )
@@ -635,6 +636,24 @@ public class SprockelBuilder extends GrammarBaseListener {
     }
 
     /**
+     * Replaces the value of an array slot.
+     * This action is not thread-safe, as it is assumed that expression is synchronized by code block
+     * @param address Register containing the memory address to save to
+     * @param value Value to save
+     * @param shared Indicator wheter to save to shared or local memory
+     */
+    private void saveArraySlotToMemory(Reg address, Reg value, boolean shared){
+        MemAddr addr = new MemAddr(address);
+        if (shared){
+            emit(OpCode.WRITE, value, addr);
+        } else {
+            emit(OpCode.STORE, value, addr);
+        }
+        releaseReg(value);
+        releaseReg(address);
+    }
+
+    /**
      * Loads a variable from memory.
      *
      * @param name Variable name
@@ -650,6 +669,26 @@ public class SprockelBuilder extends GrammarBaseListener {
             return reg;
         } else {
             MemAddr addr = memory.get(name);
+            Reg reg = getEmptyRegister();
+            emit(OpCode.LOAD, addr, reg);
+            return reg;
+        }
+    }
+
+    /**
+     * Loads a value from an arrayslot
+     * @param address Register containing the values location
+     * @param shared Indicator wheter to use shared or local memory
+     * @return returns the value encapsulated in this register
+     */
+    private Reg loadArraySlotFromMemory(Reg address, boolean shared){
+        MemAddr addr = new MemAddr(address);
+        if (shared){
+            Reg reg = getEmptyRegister();
+            emit(OpCode.READ, addr);
+            emit(OpCode.RECEIVE, reg);
+            return reg;
+        } else {
             Reg reg = getEmptyRegister();
             emit(OpCode.LOAD, addr, reg);
             return reg;
