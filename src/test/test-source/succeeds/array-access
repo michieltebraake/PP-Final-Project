@@ -1,0 +1,11 @@
+integer[] array = {1,2,3};
+
+if (array[0] == array[1]){
+    out(88);
+}
+
+array[2] = 1;
+
+if (array[0] == array[2]){
+    out(89);
+}

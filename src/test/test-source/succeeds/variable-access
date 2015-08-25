@@ -1,0 +1,14 @@
+integer a = 5;
+integer b = a;
+a = 10;
+
+boolean c = false;
+boolean d = c || true;
+boolean e = a < 3;
+
+integer[] f = {1,2,3,2,1};
+integer g = f[2] + 1;
+
+boolean h = f[1] == f[4];
+
+

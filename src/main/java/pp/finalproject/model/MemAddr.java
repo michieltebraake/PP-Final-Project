@@ -50,6 +50,9 @@ public class MemAddr extends Operand {
 
     @Override
     public String toString() {
+        if (address == -2){
+            return "stdio";
+        }
         if (address != -1)
             return "(Addr " + Integer.toString(address) + ")";
         else

@@ -11,6 +11,7 @@ stat: (SHARED target | target) ID ASSIGN expr SEMI #declAssignStat
     | whilecompare LCURLY whilebody RCURLY #whileStat
     | SYNCHRONIZED LCURLY synchronizedbody RCURLY #synchronizedStat
     | ID LSQ expr RSQ ASSIGN expr SEMI #arrayAssignStat
+    | OUT LPAR expr RPAR SEMI #outStat
     ;
 
 ifcompare: IF LPAR expr RPAR;
@@ -42,6 +43,8 @@ expr: (NUM | TRUE | FALSE) #constExpr
     ;
 
 type: INT | BOOL;
+
+OUT: 'out';
 
 INT: 'integer';
 BOOL: 'boolean';

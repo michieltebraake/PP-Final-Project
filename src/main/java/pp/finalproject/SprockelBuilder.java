@@ -46,7 +46,7 @@ public class SprockelBuilder extends GrammarBaseListener {
         String filename;
         if (args.length == 0) {
             //System.err.println("Usage: [filename]+");
-            filename = "src\\test\\java\\example14";
+            filename = "src\\test\\test-source\\succeeds\\array-access";
         } else {
             filename = args[0];
         }
@@ -547,6 +547,14 @@ public class SprockelBuilder extends GrammarBaseListener {
     @Override
     public void exitType(@NotNull GrammarParser.TypeContext ctx) {
         super.exitType(ctx);
+    }
+
+    @Override
+    public void exitOutStat(@NotNull GrammarParser.OutStatContext ctx) {
+        Reg reg = loadToReg(ctx.expr());
+        emit(OpCode.WRITE, reg, new MemAddr(-2));
+        releaseReg(reg);
+        super.exitOutStat(ctx);
     }
 
     /**

@@ -58,9 +58,7 @@ public class Util {
                     "          regvalue = regbank ! reg\n" +
                     "          pc = regbank ! PC");
             writer.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
+        } catch (FileNotFoundException | UnsupportedEncodingException e) {
             e.printStackTrace();
         }
     }
