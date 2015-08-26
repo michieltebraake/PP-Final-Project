@@ -5,10 +5,10 @@ import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import pp.finalproject.*;
+import pp.finalproject.Compiler.BuildType;
+import pp.finalproject.Util;
 import pp.finalproject.model.*;
 import pp.finalproject.typecheck.TypeChecker;
-import pp.finalproject.Compiler.BuildType;
 
 import java.io.File;
 import java.io.FileReader;
@@ -31,15 +31,18 @@ public class SprockelBuilder extends GrammarBaseListener {
     //Saves the location of branch & jump instructions needed for if statements. The values for this need to be filled in after the if statement
     private ParseTreeProperty<Op> operators = new ParseTreeProperty<>();
 
+    //Hashmaps that hold the locations of variables in memory
     private HashMap<String, MemAddr> sharedMemory = new HashMap<>();
     private HashMap<String, MemAddr> memory = new HashMap<>();
 
     private Program program = new Program();
 
+    //List that holds the number of registers in use
     private List<Integer> registersInUse = new ArrayList<>();
 
     /**
      * Compiles a sprockell program from input code and saves it as a haskell file.
+     *
      * @param file Input source code
      */
     public File build(File file, BuildType buildType, int instances) {
@@ -71,7 +74,7 @@ public class SprockelBuilder extends GrammarBaseListener {
         }
 
         //Add debug output
-        if(buildType.equals(BuildType.DEBUG)){
+        if (buildType.equals(BuildType.DEBUG)) {
             System.out.println("Created program:");
             System.out.println(program.toString());
             Util.addDebugOutput(program, memory);
@@ -615,13 +618,14 @@ public class SprockelBuilder extends GrammarBaseListener {
     /**
      * Replaces the value of an array slot.
      * This action is not thread-safe, as it is assumed that expression is synchronized by code block
+     *
      * @param address Register containing the memory address to save to
-     * @param value Value to save
-     * @param shared Indicator wheter to save to shared or local memory
+     * @param value   Value to save
+     * @param shared  Indicator wheter to save to shared or local memory
      */
-    private void saveArraySlotToMemory(Reg address, Reg value, boolean shared){
+    private void saveArraySlotToMemory(Reg address, Reg value, boolean shared) {
         MemAddr addr = new MemAddr(address);
-        if (shared){
+        if (shared) {
             emit(OpCode.WRITE, value, addr);
         } else {
             emit(OpCode.STORE, value, addr);
@@ -633,7 +637,7 @@ public class SprockelBuilder extends GrammarBaseListener {
     /**
      * Loads a variable from memory.
      *
-     * @param name Variable name
+     * @param name   Variable name
      * @param shared Load from shared memory or not
      * @return Reg with variable value
      */
@@ -654,13 +658,14 @@ public class SprockelBuilder extends GrammarBaseListener {
 
     /**
      * Loads a value from an arrayslot
+     *
      * @param address Register containing the values location
-     * @param shared Indicator wheter to use shared or local memory
+     * @param shared  Indicator wheter to use shared or local memory
      * @return returns the value encapsulated in this register
      */
-    private Reg loadArraySlotFromMemory(Reg address, boolean shared){
+    private Reg loadArraySlotFromMemory(Reg address, boolean shared) {
         MemAddr addr = new MemAddr(address);
-        if (shared){
+        if (shared) {
             Reg reg = getEmptyRegister();
             emit(OpCode.READ, addr);
             emit(OpCode.RECEIVE, reg);
@@ -692,9 +697,9 @@ public class SprockelBuilder extends GrammarBaseListener {
     }
 
     /**
-     * Releases a reg so it can be used again.
+     * Releases a register so it can be used again.
      *
-     * @param reg Reg to release
+     * @param reg Register to release
      */
     private void releaseReg(Reg reg) {
         registersInUse.remove((Integer) reg.getId());
