@@ -28,11 +28,11 @@ public class TypeChecker extends GrammarBaseListener {
         return errors;
     }
 
-    @Override
-    public void exitProgram(@NotNull GrammarParser.ProgramContext ctx) {
-        super.exitProgram(ctx);
-    }
-
+    /**
+     * Checks whether the strongly typed variable that is defined also corresponds to the correct type on the right
+     * handside.
+     * Saves the declared variables type to the operands object.
+     */
     @Override
     public void exitDeclAssignStat(@NotNull GrammarParser.DeclAssignStatContext ctx) {
         GrammarParser.TypeContext type;
@@ -56,6 +56,9 @@ public class TypeChecker extends GrammarBaseListener {
         super.exitDeclAssignStat(ctx);
     }
 
+    /**
+     * Adds the variables type to the boxing operands object
+     */
     @Override
     public void exitDeclStat(@NotNull GrammarParser.DeclStatContext ctx) {
         GrammarParser.TypeContext type;
@@ -74,6 +77,10 @@ public class TypeChecker extends GrammarBaseListener {
         super.exitDeclStat(ctx);
     }
 
+    /**
+     * Checks whether left hand side as well as right hand side have matching types.
+     * Left hand side is loaded from the operands object.
+     */
     @Override
     public void exitAssignStat(@NotNull GrammarParser.AssignStatContext ctx) {
         Operand.Type variableOperand = operands.get(variables.get(ctx.ID().getText()));
@@ -84,6 +91,9 @@ public class TypeChecker extends GrammarBaseListener {
         super.exitAssignStat(ctx);
     }
 
+    /**
+     * Checks whether the ifcompare holds a boolean expression
+     */
     @Override
     public void exitIfStat(@NotNull GrammarParser.IfStatContext ctx) {
         if (operands.get(ctx.ifcompare().expr()) != Operand.Type.BOOL) {
@@ -92,17 +102,15 @@ public class TypeChecker extends GrammarBaseListener {
         super.exitIfStat(ctx);
     }
 
+    /**
+     * Checks whether the whilecompare holds a boolean expression
+     */
     @Override
     public void exitWhileStat(@NotNull GrammarParser.WhileStatContext ctx) {
         if (operands.get(ctx.whilecompare().expr()) != Operand.Type.BOOL) {
             errors.add(new TypeException(ctx, Operand.Type.BOOL, operands.get(ctx.whilecompare().expr())));
         }
         super.exitWhileStat(ctx);
-    }
-
-    @Override
-    public void exitSynchronizedStat(@NotNull GrammarParser.SynchronizedStatContext ctx) {
-        super.exitSynchronizedStat(ctx);
     }
 
     @Override
@@ -119,26 +127,10 @@ public class TypeChecker extends GrammarBaseListener {
         super.exitArrayAssignStat(ctx);
     }
 
-    @Override
-    public void exitIfbody(@NotNull GrammarParser.IfbodyContext ctx) {
-        super.exitIfbody(ctx);
-    }
 
-    @Override
-    public void exitWhilebody(@NotNull GrammarParser.WhilebodyContext ctx) {
-        super.exitWhilebody(ctx);
-    }
-
-    @Override
-    public void exitSynchronizedbody(@NotNull GrammarParser.SynchronizedbodyContext ctx) {
-        super.exitSynchronizedbody(ctx);
-    }
-
-    @Override
-    public void exitTarget(@NotNull GrammarParser.TargetContext ctx) {
-        super.exitTarget(ctx);
-    }
-
+    /**
+     * Checks whether the value passed in array access square brackets, e.g.: 'array[0]' is a numeral value
+     */
     @Override
     public void exitArraytype(@NotNull GrammarParser.ArraytypeContext ctx) {
         if (ctx.expr() != null && operands.get(ctx.expr()) != Operand.Type.NUM) {
@@ -147,12 +139,18 @@ public class TypeChecker extends GrammarBaseListener {
         super.exitArraytype(ctx);
     }
 
+    /**
+     * Adds the type of a extended expression to the operands object
+     */
     @Override
     public void exitParExpr(@NotNull GrammarParser.ParExprContext ctx) {
         operands.put(ctx, operands.get(ctx.expr()));
         super.exitParExpr(ctx);
     }
 
+    /**
+     * Checks whether the value passed in array access square brackets, e.g.: 'array[0]' is a numeral value
+     */
     @Override
     public void exitArrayExpr(@NotNull GrammarParser.ArrayExprContext ctx) {
         if (operands.get(ctx.expr()) != Operand.Type.NUM) {
@@ -163,6 +161,9 @@ public class TypeChecker extends GrammarBaseListener {
         super.exitArrayExpr(ctx);
     }
 
+    /**
+     * Checks whether there are only numeral values used in times and devides expressions
+     */
     @Override
     public void exitTimesDivideExpr(@NotNull GrammarParser.TimesDivideExprContext ctx) {
         if (operands.get(ctx.expr(0)) != Operand.Type.NUM || operands.get(ctx.expr(1)) != Operand.Type.NUM) {
@@ -176,6 +177,9 @@ public class TypeChecker extends GrammarBaseListener {
         super.exitTimesDivideExpr(ctx);
     }
 
+    /**
+     * Checks whether there are only numeral values used in addition and minus expressions
+     */
     @Override
     public void exitPlusMinusExpr(@NotNull GrammarParser.PlusMinusExprContext ctx) {
         if (operands.get(ctx.expr(0)) != Operand.Type.NUM || operands.get(ctx.expr(1)) != Operand.Type.NUM) {
@@ -189,6 +193,9 @@ public class TypeChecker extends GrammarBaseListener {
         super.exitPlusMinusExpr(ctx);
     }
 
+    /**
+     * Checks whether there are only boolean values used in || expressions
+     */
     @Override
     public void exitOrExpr(@NotNull GrammarParser.OrExprContext ctx) {
         if (operands.get(ctx.expr(0)) != Operand.Type.BOOL || operands.get(ctx.expr(1)) != Operand.Type.BOOL) {
@@ -198,6 +205,9 @@ public class TypeChecker extends GrammarBaseListener {
         super.exitOrExpr(ctx);
     }
 
+    /**
+     * Checks whether there are only numeral values used in a negation expression
+     */
     @Override
     public void exitMinusExpr(@NotNull GrammarParser.MinusExprContext ctx) {
         if (operands.get(ctx.expr()) != Operand.Type.NUM) {
@@ -207,12 +217,18 @@ public class TypeChecker extends GrammarBaseListener {
         super.exitMinusExpr(ctx);
     }
 
+    /**
+     * the spid is a numeral value, adds this to the operands object
+     */
     @Override
     public void exitSpidExpr(@NotNull GrammarParser.SpidExprContext ctx) {
         operands.put(ctx, Operand.Type.NUM);
         super.exitSpidExpr(ctx);
     }
 
+    /**
+     * Makes sure all array elements are of the correct type.
+     */
     @Override
     public void exitArrayAssignExpr(@NotNull GrammarParser.ArrayAssignExprContext ctx) {
         Operand.Type operand = null;
@@ -229,6 +245,9 @@ public class TypeChecker extends GrammarBaseListener {
         super.exitArrayAssignExpr(ctx);
     }
 
+    /**
+     * Adds the type of a constant to the operands object
+     */
     @Override
     public void exitConstExpr(@NotNull GrammarParser.ConstExprContext ctx) {
         if (ctx.NUM() != null) {
@@ -239,12 +258,18 @@ public class TypeChecker extends GrammarBaseListener {
         super.exitConstExpr(ctx);
     }
 
+    /**
+     * updates the type of a certain variable
+     */
     @Override
     public void exitIdExpr(@NotNull GrammarParser.IdExprContext ctx) {
         operands.put(ctx, operands.get(variables.get(ctx.ID().getText())));
         super.exitIdExpr(ctx);
     }
 
+    /**
+     * Checks whether there are only numeral values compare expressions.
+     */
     @Override
     public void exitCmpExpr(@NotNull GrammarParser.CmpExprContext ctx) {
         //Check the operators that only allow nums
@@ -271,7 +296,9 @@ public class TypeChecker extends GrammarBaseListener {
         operands.put(ctx, Operand.Type.BOOL);
         super.exitCmpExpr(ctx);
     }
-
+    /**
+     * Checks whether there are only boolean values used in && expressions
+     */
     @Override
     public void exitAndExpr(@NotNull GrammarParser.AndExprContext ctx) {
         if (operands.get(ctx.expr(0)) != Operand.Type.BOOL || operands.get(ctx.expr(1)) != Operand.Type.BOOL) {
@@ -279,10 +306,5 @@ public class TypeChecker extends GrammarBaseListener {
         }
         operands.put(ctx, Operand.Type.BOOL);
         super.exitAndExpr(ctx);
-    }
-
-    @Override
-    public void exitType(@NotNull GrammarParser.TypeContext ctx) {
-        super.exitType(ctx);
     }
 }

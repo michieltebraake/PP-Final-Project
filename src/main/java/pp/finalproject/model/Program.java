@@ -11,24 +11,36 @@ public class Program {
      * This is the flattened list of instructions.
      */
     private final List<Op> opList = new ArrayList<>();
-    /** Mapping from labels defined in the program to corresponding
-     * index locations.
+
+    /**
+     * @return Number of instructions
      */
-
-    public Program() {}
-
     public int opCount() {
         return opList.size();
     }
 
+    /**
+     * Fetches a operation
+     *
+     * @param i index to fetch
+     * @return operation at index i
+     */
     public Op getOp(int i) {
         return opList.get(i);
     }
 
+    /**
+     * Adds an operation to the list
+     *
+     * @param op to be added operation
+     */
     public void addOp(Op op) {
         opList.add(op);
     }
 
+    /**
+     * @return the operations in a list separated by commas.
+     */
     @Override
     public String toString() {
         System.out.println("Number of operations: " + opList.size());

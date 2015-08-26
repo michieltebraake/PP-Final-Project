@@ -1,8 +1,13 @@
 package pp.finalproject.model;
 
 public class Reg extends Operand {
+    /**
+     * Models the registers
+     */
     private final String address;
-    //id = 1 to 5, matching RegA to RegE
+    /**
+     * id = 1 to 5, matching RegA to RegE
+     */
     private int id;
 
     public Reg(String address) {
@@ -26,7 +31,7 @@ public class Reg extends Operand {
     }
 
     @Override
-    public boolean equals (Object obj) {
+    public boolean equals(Object obj) {
         if (this == obj)
             return true;
 

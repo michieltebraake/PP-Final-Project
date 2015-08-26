@@ -7,6 +7,9 @@ import java.util.List;
 import static pp.finalproject.model.Operand.Type.*;
 
 public enum OpCode {
+    /**
+     * Framework for the different instructions and their arguments
+     */
 
     //Local instructions
     CONST(NUM, REG),

@@ -1,6 +1,9 @@
 package pp.finalproject.model;
 
 public class Target extends Operand {
+    /**
+     * Models the target types as defined on the sprockell wiki.
+     */
     private final TargetType targetType;
     private final int value;
 
@@ -15,7 +18,7 @@ public class Target extends Operand {
     }
 
     @Override
-    public boolean equals (Object obj) {
+    public boolean equals(Object obj) {
         if (this == obj)
             return true;
 
@@ -26,18 +29,18 @@ public class Target extends Operand {
         return value == other.getValue();
     }
 
-    public enum TargetType {
-        ABS, REL, IND
-    }
-
     @Override
     public String toString() {
         if (targetType == TargetType.REL) {
             return "(Rel (" + value + "))";
         } else if (targetType == TargetType.ABS) {
-            return "(Abs ("  + value + "))";
+            return "(Abs (" + value + "))";
         } else {
             return "(Ind (" + value + "))";
         }
+    }
+
+    public enum TargetType {
+        ABS, REL, IND
     }
 }

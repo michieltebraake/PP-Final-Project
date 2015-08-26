@@ -24,10 +24,12 @@ public class Op {
     public String toString() {
         StringBuilder result = new StringBuilder();
 
+        //extra tabs to make sure indentation within the haskell file is not violated, thus resulting in
+        // non-compiling haskell.
         if (opCode.getAlias() != null) {
-            result.append("     "  + opCode.getAlias());
+            result.append("     ").append(opCode.getAlias());
         } else {
-            result.append("     " + WordUtils.capitalizeFully(opCode.toString()));
+            result.append("     ").append(WordUtils.capitalizeFully(opCode.toString()));
         }
         for (Operand arg : args) {
             result.append(" ");

@@ -99,6 +99,12 @@ public class TypeCheckTest {
         assertEquals(typeCheckOneError("while (3) {}"), "pp.finalproject.typecheck.TypeException: (1, 0) incompatible types: NUM cannot be converted to BOOL");
     }
 
+    /**
+     * Utility method that grabs the first error from the typeCheck() method
+     *
+     * @param input String containing source code
+     * @return empty string or string containing the source code's first type error
+     */
     private String typeCheckOneError(String input) {
         List<String> errors = typeCheck(input);
         if (errors.isEmpty()) {
@@ -110,6 +116,12 @@ public class TypeCheckTest {
         }
     }
 
+    /**
+     * Typechecks a piece of source code
+     *
+     * @param input String containing the sourcecode
+     * @return List containing the typecheck errors
+     */
     private List<String> typeCheck(String input) {
         CharStream chars = new ANTLRInputStream(input);
         Lexer lexer = new GrammarLexer(chars);

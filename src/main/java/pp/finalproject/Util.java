@@ -10,6 +10,15 @@ import java.util.*;
 
 public class Util {
 
+    /**
+     * Writes a program to a haskell source file
+     *
+     * @param program   The program to be written
+     * @param filename  Filename of the to be generated haskell source
+     * @param instances Ammount of sprockell instances should be spawned
+     * @param buildType Determines if and the type of debug statements that should be added
+     * @return haskell source file
+     */
     public static File saveProgram(Program program, String filename, int instances, Compiler.BuildType buildType) {
         try {
             String location = "../sprockell/src/" + filename + ".hs";
@@ -25,7 +34,7 @@ public class Util {
             writer.println(program.toString());
 
             //writes footer
-            if(buildType.equals(Compiler.BuildType.DEBUG)){
+            if (buildType.equals(Compiler.BuildType.DEBUG)) {
                 writer.println("        ]\n" +
                         "\n" +
                         "main :: IO()\n" +
@@ -62,7 +71,7 @@ public class Util {
                         "        where\n" +
                         "          regvalue = regbank ! reg\n" +
                         "          pc = regbank ! PC");
-            } else if(buildType.equals(Compiler.BuildType.NORMAL)){
+            } else if (buildType.equals(Compiler.BuildType.NORMAL)) {
                 writer.println("        ]\n" +
                         "\n" +
                         "main :: IO()\n" +
@@ -91,6 +100,14 @@ public class Util {
         return null;
     }
 
+    /**
+     * Adds special debug output to the program:
+     * adds instructions to load the first 4 local variables and 1 shared variable in the registers A-E
+     * Adds a Nop instruction to output the registers at the end of the program
+     *
+     * @param program source program excluding the debug instructions
+     * @param memory  program memory holding the addresses of the variables
+     */
     public static void addDebugOutput(Program program, HashMap<String, MemAddr> memory) {
         int i = 1;
 

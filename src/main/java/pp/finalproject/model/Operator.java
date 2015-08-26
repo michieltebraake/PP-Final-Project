@@ -1,6 +1,9 @@
 package pp.finalproject.model;
 
 public class Operator extends Operand {
+    /**
+     * Models the different operators available in the sprockell instruction set.
+     */
     private final OperatorType operatorType;
 
     public Operator(OperatorType operatorType) {

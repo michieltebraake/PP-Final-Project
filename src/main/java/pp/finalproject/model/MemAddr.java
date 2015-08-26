@@ -1,6 +1,13 @@
 package pp.finalproject.model;
 
 public class MemAddr extends Operand {
+    /**
+     * Models the memory addresses as defined in the sprockell wiki
+     *
+     * Additions;
+     * memaddress -2 is a substitute for stdio
+     * memaddress -1 is a substitute to load the memory address from the register 'reg'
+     */
     private final int address;
     private final Reg reg;
 
@@ -34,17 +41,9 @@ public class MemAddr extends Operand {
 
         MemAddr other = (MemAddr) obj;
         if (other.getReg() != null) {
-            if (reg != null) {
-                return reg.equals(other.getReg());
-            } else {
-                return false;
-            }
+            return reg != null && reg.equals(other.getReg());
         } else {
-            if (reg != null) {
-                return false;
-            } else {
-                return address == other.getAddress();
-            }
+            return reg == null && address == other.getAddress();
         }
     }
 

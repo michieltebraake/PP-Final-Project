@@ -9,6 +9,9 @@ import java.io.*;
 import static org.junit.Assert.assertEquals;
 
 public class SourcesTester {
+    /*
+    Base directory that locates the source files
+     */
     public static final String BASE = "src\\test\\test-source";
 
 
@@ -118,7 +121,7 @@ public class SourcesTester {
         System.out.println("Running test on: " + src.getName());
         File hs = compile(src, 1);
         String result = run(hs);
-        int[] chars = {6,5,1,0,4,1};
+        int[] chars = {6, 5, 1, 0, 4, 1};
         assertEquals(testable(chars), result);
     }
 
@@ -205,10 +208,22 @@ public class SourcesTester {
         return "###BEGIN###" + string + "###END###";
     }
 
+    /**
+     * Converts the integers and adds the test flags to a teststring
+     *
+     * @param ints array that contains the out()-statement's predicted answers
+     * @return test string including test flags
+     */
     private String testable(int[] ints) {
         return testable(convert(ints));
     }
 
+    /**
+     * Converts an array of integers to their casted char variants.
+     *
+     * @param ints array that contains the out()-statement's predicted answers
+     * @return test string excluding test flags
+     */
     private String convert(int[] ints) {
         StringBuilder result = new StringBuilder();
         for (int i : ints) {
