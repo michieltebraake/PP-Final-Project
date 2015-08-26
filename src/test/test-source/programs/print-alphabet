@@ -1,0 +1,6 @@
+integer i = 0;
+
+while (i < 26){
+    out(i + 65);
+    i = i + 1;
+}

@@ -1,9 +1,9 @@
 package lexer;
 
 import org.junit.Test;
-import pp.finalproject.GrammarLexer;
+import pp.finalproject.antlr.GrammarLexer;
 
-import static pp.finalproject.GrammarLexer.*;
+import static pp.finalproject.antlr.GrammarLexer.*;
 
 
 public class LexerTest {

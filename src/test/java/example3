@@ -1,4 +1,0 @@
-if (4 > 3) {
-    integer a = 1;
-    integer a = 3 + true;
-}

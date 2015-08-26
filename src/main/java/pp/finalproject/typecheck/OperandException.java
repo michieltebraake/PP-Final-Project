@@ -1,6 +1,6 @@
 package pp.finalproject.typecheck;
 
-import pp.finalproject.GrammarParser;
+import pp.finalproject.antlr.GrammarParser;
 import pp.finalproject.model.Operator;
 
 public class OperandException extends Exception {

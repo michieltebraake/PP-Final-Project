@@ -1,6 +1,0 @@
-integer a = 5;
-integer b = a * 3;
-integer c = b / 3;
-integer d = b - 5;
-
-boolean e = (b + c) < d;

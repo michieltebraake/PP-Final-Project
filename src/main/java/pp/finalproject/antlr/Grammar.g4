@@ -1,6 +1,6 @@
 grammar Grammar;
 
-@header{package pp.finalproject;}
+@header{package pp.finalproject.antlr;}
 
 program: stat+;
 

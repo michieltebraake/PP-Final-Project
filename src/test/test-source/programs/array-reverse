@@ -1,11 +1,21 @@
 integer[] array = {1,2,3,4};
 integer size = 3;
 
-integer i = 0;
+out(array[0]);
+out(array[1]);
+out(array[2]);
+out(array[3]);
 
-while (i < size) {
+integer i = 0;
+integer loop = (size + 1) / 2;
+while (i < loop) {
 	integer temp = array[i];
 	array[i] = array[size - i];
 	array[size - i] = temp;
 	i = i + 1;
 }
+
+out(array[0]);
+out(array[1]);
+out(array[2]);
+out(array[3]);

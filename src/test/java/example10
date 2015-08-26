@@ -1,8 +1,0 @@
-integer[] array = {1,2,3};
-
-integer[3] test;
-integer i = 0;
-while (i < 3) {
-    test[i] = array[2 - i];
-    i = i + 1;
-}

@@ -1,7 +1,11 @@
-integer a = 10;
+integer a = 6;
+out(a);
 
 if (a > 5) {
     a = 20;
+    out(a);
     boolean a = true;
+    out(a);
     a = false;
+    out(a);
 }

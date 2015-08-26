@@ -1,10 +1,12 @@
-integer mypid = spid;
-shared boolean flag = {false, false};
-shared integer turn;
 shared integer result;
+
+integer mypid = spid;
+shared boolean[] flag = {false, false};
+shared boolean[] busy = {true, true};
+shared integer turn;
 integer i;
 
-while(i < 10){
+while(i < 20){
     synchronized{
         flag[mypid] = true;
         turn = 1-mypid;
@@ -18,4 +20,12 @@ while(i < 10){
     }
 
 	i = i + 1;
+}
+
+busy[mypid] = false;
+
+if(mypid == 0){
+    while(busy[0] || busy[1]){
+    }
+    out(result);
 }

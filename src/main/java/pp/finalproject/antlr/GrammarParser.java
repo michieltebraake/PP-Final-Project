@@ -1,5 +1,5 @@
-// Generated from D:/GitHub/PP-Final-Project/src/main/java/pp/finalproject\Grammar.g4 by ANTLR 4.5
-package pp.finalproject;
+// Generated from D:/GitHub/PP-Final-Project/src/main/java/pp/finalproject/antlr\Grammar.g4 by ANTLR 4.5
+package pp.finalproject.antlr;
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.*;

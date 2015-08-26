@@ -1,2 +1,0 @@
-shared integer test = 15;
-test = test + 20;

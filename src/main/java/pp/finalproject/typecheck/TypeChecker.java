@@ -4,8 +4,8 @@ import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import pp.finalproject.GrammarBaseListener;
-import pp.finalproject.GrammarParser;
+import pp.finalproject.antlr.GrammarBaseListener;
+import pp.finalproject.antlr.GrammarParser;
 import pp.finalproject.model.Operand;
 import pp.finalproject.model.Operator;
 

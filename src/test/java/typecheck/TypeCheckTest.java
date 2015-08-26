@@ -3,8 +3,8 @@ package typecheck;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.junit.Test;
-import pp.finalproject.GrammarLexer;
-import pp.finalproject.GrammarParser;
+import pp.finalproject.antlr.GrammarLexer;
+import pp.finalproject.antlr.GrammarParser;
 import pp.finalproject.typecheck.TypeChecker;
 
 import java.util.ArrayList;

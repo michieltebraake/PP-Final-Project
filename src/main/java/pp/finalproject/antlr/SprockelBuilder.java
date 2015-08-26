@@ -1,12 +1,14 @@
-package pp.finalproject;
+package pp.finalproject.antlr;
 
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import pp.finalproject.*;
 import pp.finalproject.model.*;
 import pp.finalproject.typecheck.TypeChecker;
+import pp.finalproject.Compiler.BuildType;
 
 import java.io.File;
 import java.io.FileReader;
@@ -36,31 +38,11 @@ public class SprockelBuilder extends GrammarBaseListener {
 
     private List<Integer> registersInUse = new ArrayList<>();
 
-    public SprockelBuilder() {
-    }
-
-    /**
-     * Main method to build and print the CFG of a simple Java program.
-     */
-    public static void main(String[] args) {
-        String filename;
-        if (args.length == 0) {
-            //System.err.println("Usage: [filename]+");
-            filename = "src\\test\\test-source\\programs\\array-reverse";
-        } else {
-            filename = args[0];
-        }
-        SprockelBuilder builder = new SprockelBuilder();
-        File file = new File(filename);
-        System.out.println(filename);
-        builder.build(file);
-    }
-
     /**
      * Compiles a sprockell program from input code and saves it as a haskell file.
      * @param file Input source code
      */
-    public void build(File file) {
+    public File build(File file, BuildType buildType, int instances) {
         try {
             CharStream chars = new ANTLRInputStream(new FileReader(file));
             Lexer lexer = new GrammarLexer(chars);
@@ -72,16 +54,14 @@ public class SprockelBuilder extends GrammarBaseListener {
             ParseTree tree = parser.program();
 
             if (parser.getNumberOfSyntaxErrors() != 0)
-                return;
+                return null;
 
             TypeChecker typeChecker = new TypeChecker();
             typeChecker.check(tree);
             if (!typeChecker.getErrors().isEmpty()) {
                 System.out.println("Program contains errors:");
-                for (Exception error : typeChecker.getErrors()) {
-                    System.out.println(error);
-                }
-                return;
+                typeChecker.getErrors().forEach(System.out::println);
+                return null;
             }
 
             ParseTreeWalker walker = new ParseTreeWalker();
@@ -89,20 +69,17 @@ public class SprockelBuilder extends GrammarBaseListener {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        System.out.println("Created program:");
-        System.out.println(program.toString());
-        System.out.println("Done.");
 
         //Add debug output
-        Util.addDebugOutput(program, memory);
-
-        Util.saveProgram(program);
-        /*Runtime runtime = Runtime.getRuntime();
-        try {
-            Process process = runtime.exec(String.format("ghc -i../Sprockel/src %s", "test"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }*/
+        if(buildType.equals(BuildType.DEBUG)){
+            System.out.println("Created program:");
+            System.out.println(program.toString());
+            Util.addDebugOutput(program, memory);
+        } else {
+            program.addOp(new Op(OpCode.NOP));
+            program.addOp(new Op(OpCode.ENDPROG));
+        }
+        return Util.saveProgram(program, file.getName(), instances, buildType);
     }
 
     @Override

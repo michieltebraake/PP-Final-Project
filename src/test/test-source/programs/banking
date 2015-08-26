@@ -1,15 +1,28 @@
 shared integer money = 0;
+
+shared boolean[] busy = {true, true, true};
+
+integer myspid = spid;
+
 integer i = 0;
 while (i < 10) {
     i = i + 1;
     synchronized {
-        money = money + 100;
+        money = money + 4;
     }
 }
 i = 0;
 while (i < 10) {
     i = i + 1;
     synchronized {
-        money = money - 50;
+        money = money - 2;
     }
+}
+
+busy[myspid] = false;
+
+if(myspid == 0){
+    while(busy[0] || busy[1] || busy[2]){}
+    out(money);
+
 }

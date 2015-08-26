@@ -1,4 +1,10 @@
 integer i = 0;
-while (i < 10) {
+integer z = 0;
+while (i < 3){
+	z = 0;
+	while(z < 5){
+		out(65 + z);
+		z = z + 1;
+	}
 	i = i + 1;
 }

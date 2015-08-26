@@ -1,14 +1,17 @@
-integer[] array = {1,2,3};
+integer[] array = {2,2,3};
+out(array[0]);
+out(array[1]);
+out(array[2]);
 
-
-if (array[0] == array[1]){
-    out(88);
+integer i = 0;
+while(i < 3){
+    array[i] = array[i] * 2;
+    i = i + 1;
 }
 
-array[2] = 1;
+out(array[0]);
+out(array[1]);
+out(array[2]);
 
-if (array[0] == array[2]){
-    out(89);
-}
-
-array[1] = array[2];
+out(array[0] == array[1]);
+out(array[0] == array[2]);

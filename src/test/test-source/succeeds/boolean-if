@@ -1,0 +1,21 @@
+integer i = 5;
+boolean b = true;
+if (i > 3) {
+	out(88);
+}
+
+if (i >= 5 && i <= 5){
+	out(88);
+}
+
+if (i < 10){
+	out(88);
+}
+
+if (i == 5){
+	out(88);
+}
+
+if (i == 5 && b){
+	out(88);
+}
